@@ -1,0 +1,747 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Body */
+body {
+    background-color: #f4f7fa;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    align-items: stretch;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #2c3e50;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: fixed; /* Fix navbar at the top */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Ensure it stays above other content */
+}
+
+.navbar a {
+    color: #ffffff;
+    text-decoration: none;
+    margin-right: 20px;
+    font-size: 1.1rem;
+}
+
+.navbar a:hover {
+    color: #3498db;
+}
+
+/* New Order Button */
+.new-order-btn {
+    background-color: #3498db;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* Main Content Container */
+.main-content {
+    margin-top: 80px; /* Offset for fixed navbar height */
+    width: 100%;
+    max-width: 1200px; /* Limit max width for better readability */
+    padding: 20px;
+}
+
+/* Headings */
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-top: 35px;
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
+
+h2 {
+    color: #34495e;
+    margin-top: 50px;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+/* Form Elements (unchanged, kept for consistency) */
+label {
+    display: block;
+    color: #2c3e50;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="datetime-local"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #dfe6e9;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="datetime-local"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+
+.select-clothes-button {
+    background-color: #ecf0f1;
+    color: #7f8c8d;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    transition: background-color 0.3s;
+}
+
+.select-clothes-button:hover {
+    background-color: #dfe6e9;
+}
+
+/* Submit Button */
+button[type="submit"] {
+    background-color: #3498db;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button[type="submit"]:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* Textarea for Special Requests */
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Category Selection Styles */
+.category-menu {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.category-menu h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.category-item {
+    display: block;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #495057;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-item:hover {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-color: #2196f3;
+    color: #1976d2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.category-item.active {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    border-color: #1565c0;
+    color: white;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+/* Clothes Section Styles */
+.clothes-section {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.clothes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.cloth-item {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cloth-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #2196f3;
+}
+
+.cloth-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 3rem;
+}
+
+.cloth-info h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.cloth-price {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+/* Quantity Controls */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    gap: 5px;
+}
+
+.qty-btn {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #dee2e6;
+    border-radius: 50%;
+    background: #f8f9fa;
+    color: #495057;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.qty-btn:hover {
+    background: #2196f3;
+    color: white;
+    border-color: #2196f3;
+}
+
+.qty-input {
+    width: 60px;
+    height: 35px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    margin: 0 5px;
+    font-weight: bold;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h2 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+}
+
+/* Floating Cart Button */
+.floating-cart-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.floating-cart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+}
+
+.cart-count {
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    margin-left: 8px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    transition: opacity 0.3s ease;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .navbar {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .navbar a {
+        margin: 5px 0;
+    }
+
+    .main-content {
+        margin-top: 60px; /* Adjust for smaller navbar in mobile */
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    input, select, textarea, button {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 10px;
+        margin-top: 70px;
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .clothes-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .floating-cart-btn {
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 16px;
+    }
+}
+
+/* Category Menu */
+.category-menu {
+    display: flex;
+    justify-content: center;
+    background-color: #ecf0f1;
+    padding: 10px;
+    margin-top: 80px; /* Below fixed navbar */
+}
+
+.category-menu a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #34495e;
+    font-size: 1.2rem;
+}
+
+.category-menu a.active {
+    font-weight: bold;
+    color: #3498db;
+}
+
+/* Basket Icon */
+.basket-icon {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    font-size: 1.5rem;
+    color: #34495e;
+    text-decoration: none;
+}
+
+/* Clothes Grid */
+.clothes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Ensure even distribution */
+    gap: 20px;
+    width: 100%; /* Use full available width */
+    max-width: 1200px; /* Limit max width for better layout */
+    margin-top: 20px; /* Space after category menu */
+    margin-left: auto;
+    margin-right: auto; /* Center the grid container horizontally */
+    padding: 20px; /* Add padding for better spacing */
+}
+
+/* Cloth Item */
+.cloth-item {
+    text-align: center; /* Keep text within item centered */
+    padding: 20px;
+    border: 1px solid #dfe6e9;
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: transform 0.2s; /* Smooth hover effect */
+}
+
+.cloth-item:hover {
+    transform: translateY(-5px); /* Slight lift on hover for interactivity */
+}
+
+/* Order Table */
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.order-table th, .order-table td {
+    border: 1px solid #dfe6e9;
+    padding: 12px;
+    text-align: left;
+}
+
+.order-table th {
+    background-color: #ecf0f1;
+}
+
+/* Cart Table */
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cart-table th, .cart-table td {
+    border: 1px solid #dfe6e9;
+    padding: 12px;
+    text-align: left;
+}
+
+.cart-table th {
+    background-color: #ecf0f1;
+}
+
+.delete-btn {
+    color: #e74c3c;
+    text-decoration: none;
+}
+
+.delete-btn:hover {
+    color: #c0392b;
+}
+
+.clear-cart-btn {
+    background-color: #e74c3c;
+    color: #ffffff;
+    padding: 8px 15px; /* Reduced padding to fit text size */
+    border-radius: 8px;
+    text-decoration: none;
+    width: fit-content; /* Adjust width to content */
+}
+
+.clear-cart-btn:hover {
+    color: #c0392b;
+}
+
+
+.confirm-btn {
+    background-color: #27ae60;
+    color: #ffffff;
+    padding: 8px 15px; /* Reduced padding to fit text size */
+    border-radius: 8px;
+    text-decoration: none;
+    display: block; /* Change to block for centering */
+    margin: 20px auto 0; /* Center horizontally, keep top margin */
+    width: fit-content; /* Adjust width to content */
+}
+
+.confirm-btn:hover {
+    background-color: #219a52;
+}
+
+.cancel-btn {
+    background-color: #e74c3c;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-right: 20px;
+    margin-left: 30px;
+}
+
+.cancel-btn:hover {
+    background-color: #c0392b;
+}
+
+.checkout-btn {
+    background-color: #2a7bf4;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-right: 20px;
+    margin-left: 30px;
+}
+
+.checkout-btn:hover {
+    background-color: #2a7bf4;
+}
+
+.order-table a {
+    text-decoration: none;
+    color: inherit; /* Inherits the text color from the parent (e.g., black or table text color) */
+}
+
+.order-table a:hover {
+    color: #3498db; /* Optional: Add a hover effect for better UX */
+}
+
+.cloth-image {
+    max-width: 100px; /* Fixed max width to fit table */
+    max-height: 100px; /* Fixed max height */
+    object-fit: cover; /* Maintain aspect ratio and cover the area */
+    border-radius: 4px; /* Optional: Rounded corners */
+    display: block; /* Ensure proper alignment */
+}
+
+.cart-table td {
+    vertical-align: middle; /* Align content vertically in cells */
+}
+
+.edit-btn, .delete-btn, .pay-btn {
+    background-color: #3498db; /* Blue for edit, overridden for delete/pay */
+    color: #ffffff;
+    padding: 8px 15px; /* Consistent with confirm-btn */
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 5px; /* Spacing between buttons */
+}
+
+.pay-btn {
+    background-color: #2ecc71; /* Green for edit */
+}
+
+.pay-btn:hover {
+    background-color: #27ae60; /* Darker green on hover */
+}
+
+.delete-btn {
+    background-color: #e74c3c; /* Red for delete */
+}
+
+.delete-btn:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}
+
+.edit-btn {
+    background-color: #3498db
+}
+
+.edit-btn:hover {
+    background-color: #2980b9
+}
+
+/* Container for button layout */
+.button-group {
+    text-align: center; /* Center the group */
+    margin-top: 20px; /* Space from above content */
+}
+
+.button-group .edit-delete-row {
+    display: flex;
+    justify-content: center; /* Center the edit and delete buttons */
+    margin-bottom: 10px; /* Space before pay button */
+}
+
+.button-group .edit-delete-row .edit-btn,
+.button-group .edit-delete-row .delete-btn {
+    margin: 0 10px; /* Horizontal spacing between edit and delete */
+}
+
+.button-group .pay-btn {
+    display: block; /* Ensure pay button takes full width for centering */
+    margin: 0 auto; /* Center the pay button */
+}
+
+.success-message {
+    background-color: #2ecc71;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.error {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.button-container {
+    text-align: right;
+    padding: 10px;
+    margin-top: 50px;
+}
+.new-order-btn {
+    background-color: #3498db; /* Blue color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 16px;
+}
+.new-order-btn:hover {
+    background-color: #2980b9; /* Darker blue on hover */
+}
+
+.request-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+.delete-request-btn {
+    background-color: #e74c3c; /* Red color for delete */
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.delete-request-btn:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}
+
+.back-to-orders-btn {
+    background-color: #3498db; /* Blue color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 16px;
+}
+.back-to-orders-btn:hover {
+    background-color: #2980b9; /* Darker blue on hover */
+}
+
+.view-basket-btn {
+    background-color: #2c3e50;
+    color: #ffffff;
+    padding: 8px 15px; /* Reduced padding to fit text size */
+    border-radius: 8px;
+    text-decoration: none;
+    display: block; /* Change to block for centering */
+    margin: 20px auto 0; /* Center horizontally, keep top margin */
+    width: fit-content; /* Adjust width to content */
+}
+
+.view-basket-btn:hover {
+    background-color: #2980b9;
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" href="/css/profile.css">
+    <style>
+        .hidden { display: none; }
+        .profile-view { margin-bottom: 2em; }
+        .profile-label { font-weight: bold; margin-right: 0.5em; }
+        .profile-row { margin-bottom: 1em; }
+    </style>
+</head>
+<body>
+<div class="form">
+    <!-- Read-only profile view -->
+    <div id="profileView" class="profile-view">
+        <div class="title">Welcome</div>
+        <div class="subtitle">User Details</div>
+        <div class="profile-row"><span class="profile-label">First Name:</span> <span th:text="${profileDto.firstName}"></span></div>
+        <div class="profile-row"><span class="profile-label">Last Name:</span> <span th:text="${profileDto.lastName}"></span></div>
+        <div class="profile-row"><span class="profile-label">Address:</span> <span th:text="${profileDto.address}"></span></div>
+        <div class="profile-row"><span class="profile-label">Phone Number:</span> <span th:text="${profileDto.phoneNumber}"></span></div>
+        <button type="button" onclick="showEditForm()">Edit</button>
+    </div>
+
+    <!-- Edit form, hidden by default -->
+    <form id="profileForm" class="hidden" th:action="@{/profile/update}" th:object="${profileDto}" method="post">
+        <div class="title">Welcome</div>
+        <div class="subtitle">Update User Details</div>
+        <div class="input-container ic1">
+            <input id="firstname" class="input" type="text" placeholder=" " th:field="*{firstName}" required  />
+            <div class="cut"></div>
+            <label for="firstname" class="placeholder">First name</label>
+        </div>
+        <div class="input-container ic2">
+            <input id="lastname" class="input" type="text" placeholder=" " th:field="*{lastName}" required />
+            <div class="cut"></div>
+            <label for="lastname" class="placeholder">Last name</label>
+        </div>
+        <div class="input-container ic2">
+            <input id="Address" class="input" type="text" placeholder=" " th:field="*{address}" required  />
+            <div class="cut"></div>
+            <label for="Address" class="placeholder">Address</label>
+        </div>
+        <div class="input-container ic2">
+            <input id="phoneNumber" class="input" type="text" placeholder=" " th:field="*{phoneNumber}" required  />
+            <div class="cut"></div>
+            <label for="phoneNumber" class="placeholder">Phone Number</label>
+        </div>
+        <button type="submit" class="submit">Submit</button>
+        <button type="button" onclick="hideEditForm()">Cancel</button>
+    </form>
+    <div class="links">
+        <a th:if="${role == 'CUSTOMER'}" href="/customer-dashboard">Back to Dashboard</a>
+        <a th:if="${role == 'STAFF'}" href="/staff-dashboard">Back to Dashboard</a>
+    </div>
+</div>
+<script>
+    function showEditForm() {
+        document.getElementById('profileView').classList.add('hidden');
+        document.getElementById('profileForm').classList.remove('hidden');
+    }
+    function hideEditForm() {
+        document.getElementById('profileForm').classList.add('hidden');
+        document.getElementById('profileView').classList.remove('hidden');
+    }
+</script>
+</body>
+</html>

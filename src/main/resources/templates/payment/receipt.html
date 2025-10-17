@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Payment Receipt</title>
+    <meta http-equiv="refresh" content="5; URL='/payments/dashboard?orderId=' + [[${orderId}]]" />
+    <style>
+        body {
+            background-color: #0a1f44;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            padding: 60px;
+        }
+        .receipt-box {
+            background-color: #1e3a8a;
+            padding: 30px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="receipt-box">
+    <h2>Payment Successful ✅</h2>
+    <p>Your payment has been verified.</p>
+    <p>Order ID: <span th:text="${orderId}"></span></p>
+    <p>Status: Paid</p>
+
+    <form th:action="@{/payments/download}" method="post">
+        <input type="hidden" name="orderId" th:value="${orderId}" />
+        <button class="btn" type="submit">Download Receipt</button>
+    </form>
+
+    <p style="margin-top: 20px;">Redirecting to dashboard in 5 seconds...</p>
+</div>
+<script>
+    setTimeout(function() {
+        window.location.href = "/payments/dashboard?orderId=[[${orderId}]]";
+    }, 5000); // Redirect after 5 seconds
+</script>
+</body>
+</html>
+

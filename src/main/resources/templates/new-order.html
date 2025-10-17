@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Place New Order</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Place a New Laundry Order</h2>
+
+    <div th:if="${successMessage}" class="message success">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${errorMessage}" class="message error">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <form th:action="@{/orders/order}" th:object="${order}" method="post">
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" th:field="*{quantity}" min="1" required />
+        </div>
+        <div class="form-group">
+            <label for="specialInstructions">Special Instructions:</label>
+            <textarea id="specialInstructions" th:field="*{specialInstructions}" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="pickupSlot">Available Pickup Slots:</label>
+            <select id="pickupSlot" required>
+                <option value="">Select a pickup slot</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="deliverySlot">Available Delivery Slots:</label>
+            <select id="deliverySlot" required>
+                <option value="">Select a delivery slot</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="pickupDate">Pickup Date:</label>
+            <input type="date" id="pickupDate" th:field="*{pickupDate}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="deliveryDate">Delivery Date:</label>
+            <input type="date" id="deliveryDate" th:field="*{deliveryDate}" readonly />
+        </div>
+        <button type="submit">Place Order</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 20px;">
+        <a th:href="@{/customer-dashboard}">Back to Dashboard</a>
+    </p>
+</div>
+<script>
+// Fetch available slots and populate dropdowns
+fetch('/available-delivery-slots')
+    .then(res => res.json())
+    .then(data => {
+        const pickupSelect = document.getElementById('pickupSlot');
+        const deliverySelect = document.getElementById('deliverySlot');
+        data.forEach(slot => {
+            const optionPickup = document.createElement('option');
+            optionPickup.value = slot.date;
+            optionPickup.text = `${slot.date} | ${slot.startTime} - ${slot.endTime}`;
+            pickupSelect.appendChild(optionPickup);
+            const optionDelivery = document.createElement('option');
+            optionDelivery.value = slot.date;
+            optionDelivery.text = `${slot.date} | ${slot.startTime} - ${slot.endTime}`;
+            deliverySelect.appendChild(optionDelivery);
+        });
+    });
+// When slot is selected, set date fields
+document.getElementById('pickupSlot').onchange = function() {
+    document.getElementById('pickupDate').value = this.value;
+};
+document.getElementById('deliverySlot').onchange = function() {
+    document.getElementById('deliveryDate').value = this.value;
+};
+</script>
+</body>
+</html>

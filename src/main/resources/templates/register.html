@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Registration</title>
+  <link rel="stylesheet" href="/css/register.css">
+</head>
+<body>
+<div class="form">
+  <form th:action="@{/register}" th:object="${user}" method="post">
+  <div class="title">Welcome</div>
+  <div class="subtitle">Let's create your account!</div>
+  <div class="input-container ic1">
+    <input id="firstname" class="input" type="text" placeholder=" " th:field="*{firstName}" required  />
+    <div class="cut"></div>
+    <label for="firstname" class="placeholder">First name</label>
+  </div>
+  <div class="input-container ic2">
+    <input id="lastname" class="input" type="text" placeholder=" " th:field="*{lastName}" required />
+    <div class="cut"></div>
+    <label for="lastname" class="placeholder">Last name</label>
+  </div>
+  <div class="input-container ic2">
+    <input id="Address" class="input" type="text" placeholder=" "th:field="*{address}" required  />
+    <div class="cut"></div>
+    <label for="Address" class="placeholder">Address</label>
+  </div>
+  <div class="input-container ic2">
+    <input id="phoneNumber" class="input" type="text" placeholder=" "th:field="*{phoneNumber}" required  />
+    <div class="cut"></div>
+    <label for="phoneNumber" class="placeholder">Phone Number</label>
+  </div>
+  <div class="input-container ic2">
+    <input id="email" class="input" type="text" placeholder=" " th:field="*{email}" required  />
+    <div class="cut cut-short"></div>
+    <label for="email" class="placeholder">Email</label>
+  </div>
+  <div class="input-container ic2">
+    <input id="password" class="input" type="password" placeholder=" " th:field="*{password}" required />
+    <div class="cut"></div>
+    <label for="password" class="placeholder">Password</label>
+  </div>
+  <button type="submit" class="submit">submit</button>
+  </form>
+    <div class="links">
+        <a href="/login">Already have an account? Login</a>
+      </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Register</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .register-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 350px;
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .register-header h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .register-btn {
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .register-btn:hover {
+            background-color: #2980b9;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: white;  /* same as input */
+            font-size: 14px;
+            color: #2c3e50;
+            appearance: none; /* remove default arrow style */
+        }
+
+        .form-group select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px #3498db;
+        }
+    </style>
+</head>
+<body>
+<div class="register-container">
+    <div class="register-header">
+        <h2>Register New Admin</h2>
+    </div>
+    <form action="/register" method="post">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="fullName" required>
+        </div>
+        <div class="form-group">
+            <label>User Name</label>
+            <input type="text" name="userName" required>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="text" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label>Phone number</label>
+            <input type="text" name="phoneNumber" required>
+        </div>
+
+        <div class="form-group">
+            <label>Role</label>
+            <select name="role" required>
+                <option value="">--Select Role--</option>
+                <option value="manage_admin">Manager Admin</option>
+                <option value="staff_admin">Staff Admin</option>
+            </select>
+        </div>
+
+        <button type="submit" class="register-btn">Register</button>
+    </form>
+</div>
+</body>
+</html>

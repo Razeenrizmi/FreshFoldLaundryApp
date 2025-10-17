@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Pickup - FreshFold Laundry</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <style>
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--light-bg);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 15px 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary-color);
+        }
+
+        .time-slot.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .time-slot.unavailable {
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .order-summary {
+            background: var(--light-bg);
+            border-left: 4px solid var(--primary-color);
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-total {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            border-bottom: none;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 2px solid var(--border-color);
+        }
+
+
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .checkout-btn {
+            background-color: #2a7bf4;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-right: 20px;
+            margin-left: 30px;
+        }
+
+        .checkout-btn:hover {
+            background-color: #2a7bf4;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .time-slots {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <span>🧺</span>
+                <h1>FreshFold Laundry</h1>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/schedule}" class="active">Schedule Pickup</a></li>
+                    <li><a th:href="@{/track}">Track Order</a></li>
+                    <li><a th:href="@{/coordinator}">Coordinator</a></li>
+                    <li><a th:href="@{/driver(driverId=1)}">Driver</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <div class="card">
+        <h2>Schedule Laundry Pickup & Delivery</h2>
+        <p>Fill out the form below to schedule your professional laundry service.</p>
+    </div>
+
+    <!-- Display Errors -->
+    <div th:if="${param.error}" class="alert alert-error">
+        <strong>Error:</strong> <span th:text="${param.error}"></span>
+    </div>
+
+    <div class="main-content">
+        <div>
+            <form th:action="@{/schedule}" th:object="${order}" method="post" class="card">
+                <!-- Customer Information -->
+                <div class="form-section">
+                    <h3>👤 Customer Information</h3>
+                    <div class="form-group">
+                        <label for="customerName">Full Name *</label>
+                        <input type="text" id="customerName" th:field="*{customerName}" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number *</label>
+                        <input type="tel" id="customerPhone" th:field="*{customerPhone}" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerAddress">Pickup Address *</label>
+                        <textarea id="customerAddress" th:field="*{customerAddress}" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+
+                <!-- Pickup Details -->
+                <div class="form-section">
+                    <h3>📅 Pickup Details</h3>
+                    <div class="form-group">
+                        <label for="pickupDate">Pickup Date *</label>
+                        <input type="date" id="pickupDate" th:field="*{pickupDate}" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preferred Pickup Time *</label>
+                        <div class="time-slots" id="pickupTimeSlots">
+                            <!-- Time slots populated by JS -->
+                        </div>
+                        <input type="time" id="pickupTime" th:field="*{pickupTime}" required hidden>
+                    </div>
+                </div>
+
+                <!-- Delivery Details -->
+                <div class="form-section">
+                    <h3>📦 Delivery Details</h3>
+                    <div class="form-group">
+                        <label for="deliveryDate">Delivery Date *</label>
+                        <input type="date" id="deliveryDate" th:field="*{deliveryDate}" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preferred Delivery Time *</label>
+                        <div class="time-slots" id="deliveryTimeSlots">
+                            <!-- Time slots populated by JS -->
+                        </div>
+                        <input type="time" id="deliveryTime" th:field="*{deliveryTime}" required hidden>
+                    </div>
+                </div>
+
+                <!-- Special Instructions -->
+                <div class="form-section">
+                    <h3>📝 Special Instructions</h3>
+                    <div class="form-group">
+                        <label for="specialInstructions">Any special requirements?</label>
+                        <textarea id="specialInstructions" th:field="*{specialInstructions}" class="form-control" rows="3" placeholder="Detergent preferences, fabric care instructions, etc."></textarea>
+                    </div>
+                </div>
+
+                <a th:href="@{/payments/payment/dashboard}" class="checkout-btn">Checkout</a>
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div>
+            <div class="card order-summary">
+                <h2>💰 Order Summary</h2>
+                <div class="summary-item">
+                    <span>Standard Washing</span>
+                    <span>Rs. 500.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Ironing Service</span>
+                    <span>Rs. 200.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Delivery Charge</span>
+                    <span>Rs. 150.00</span>
+                </div>
+                <div class="summary-item summary-total">
+                    <span>Total Amount</span>
+                    <span>Rs. 850.00</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💡 Service Information</h2>
+                <div style="margin-top: 15px;">
+                    <p><strong>🏷️ Free Pickup:</strong> Within Colombo city limits</p>
+                    <p><strong>⚡ Turnaround:</strong> 24-48 hours</p>
+                    <p><strong>⭐ Quality:</strong> 100% satisfaction guaranteed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2024 FreshFold Laundry Management System. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    function formatTime(timeString) {
+        const [hours, minutes] = timeString.split(':');
+        let hour = parseInt(hours);
+        const period = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12 || 12;
+        return `${hour}:${minutes} ${period}`;
+    }
+
+    function generateTimeSlots(containerId, hiddenId, available) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        const allSlots = ['09:00', '11:00', '13:00', '15:00'];
+        allSlots.forEach((time) => {
+            const slotElement = document.createElement('div');
+            slotElement.className = 'time-slot';
+            const startHour = parseInt(time.split(':')[0]);
+            const endHour = startHour + 2;
+            const startDisplay = formatTime(time);
+            const endDisplay = formatTime(`${endHour < 10 ? '0' + endHour : endHour}:00`);
+            slotElement.textContent = `${startDisplay} - ${endDisplay}`;
+            slotElement.dataset.time = time;
+            if (available.includes(time)) {
+                slotElement.addEventListener('click', function() {
+                    document.querySelectorAll(`#${containerId} .time-slot`).forEach(s => s.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById(hiddenId).value = time;
+                });
+            } else {
+                slotElement.classList.add('unavailable');
+            }
+            container.appendChild(slotElement);
+        });
+    }
+
+    function fetchAvailableTimes(type, date, containerId, hiddenId) {
+        if (!date) return;
+        fetch(`/available-times?type=${type}&date=${date}`)
+            .then(response => response.json())
+            .then(available => {
+                generateTimeSlots(containerId, hiddenId, available.map(t => t.substring(0, 5)));
+            })
+            .catch(error => console.error('Error fetching available times:', error));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        const pickupDateInput = document.getElementById('pickupDate');
+        const deliveryDateInput = document.getElementById('deliveryDate');
+        pickupDateInput.min = today;
+        deliveryDateInput.min = today;
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        pickupDateInput.value = tomorrow.toISOString().split('T')[0];
+
+        const dayAfter = new Date(tomorrow);
+        dayAfter.setDate(dayAfter.getDate() + 1);
+        deliveryDateInput.value = dayAfter.toISOString().split('T')[0];
+
+        fetchAvailableTimes('pickup', pickupDateInput.value, 'pickupTimeSlots', 'pickupTime');
+        fetchAvailableTimes('delivery', deliveryDateInput.value, 'deliveryTimeSlots', 'deliveryTime');
+
+        pickupDateInput.addEventListener('change', () => fetchAvailableTimes('pickup', pickupDateInput.value, 'pickupTimeSlots', 'pickupTime'));
+        deliveryDateInput.addEventListener('change', () => fetchAvailableTimes('delivery', deliveryDateInput.value, 'deliveryTimeSlots', 'deliveryTime'));
+    });
+</script>
+</body>
+</html>

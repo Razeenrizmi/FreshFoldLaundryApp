@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Order Success</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<nav class="navbar">
+    <a th:href="@{/orders}">Orders</a>
+    <a th:href="@{/browse?categoryId=1}">Browse Clothes</a>
+</nav>
+<h1>Order Saved Successfully!</h1>
+<h2 th:text="'Your Order ID is: ' + ${orderId}"></h2>
+<a th:href="@{/orders}" class="confirm-btn">OK</a>
+
+</body>
+</html>

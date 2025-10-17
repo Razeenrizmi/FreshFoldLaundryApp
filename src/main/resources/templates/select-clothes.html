@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Clothes Type - LaundryApp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Enhanced Navbar */
+        .navbar {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95) 0%, rgba(45, 53, 97, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(79, 172, 254, 0.3);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: #e8eaff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.1) 100%);
+            transition: left 0.3s ease;
+        }
+
+        .nav-links a:hover::before {
+            left: 0;
+        }
+
+        .nav-links a:hover {
+            color: #4facfe;
+            transform: translateY(-2px);
+        }
+
+        .wash-bag-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wash-bag-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .wash-bag-btn:hover::before {
+            left: 100%;
+        }
+
+        .wash-bag-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+        }
+
+        .cart-count {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Enhanced Breadcrumb */
+        .breadcrumb {
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: rgba(232, 234, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb i {
+            color: #4facfe;
+            font-size: 0.75rem;
+        }
+
+        /* Enhanced Page Title */
+        .page-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 2rem 0 3rem;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        /* Enhanced Clothes Grid */
+        .clothes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 0 2rem 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .clothes-card {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.8) 0%, rgba(45, 53, 97, 0.9) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(79, 172, 254, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .clothes-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .clothes-card:hover::before {
+            opacity: 1;
+        }
+
+        .clothes-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(79, 172, 254, 0.4);
+            border-color: #4facfe;
+        }
+
+        .clothes-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .clothes-card:hover img {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(79, 172, 254, 0.4);
+        }
+
+        .clothes-card span {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e8eaff;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Enhanced Modal Styling */
+        .modal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .checkout-modal, .cart-modal {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95) 0%, rgba(45, 53, 97, 0.95) 100%);
+            border-radius: 25px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.4s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            transform: scale(1.1);
+        }
+
+        .modal-cloth-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin: 0 auto 2rem;
+            display: block;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-details h2 {
+            color: #4facfe;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .modal-price {
+            color: #2ed573;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-service-type {
+            color: #e8eaff;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .modal-delivery-slots, .modal-notes {
+            margin-bottom: 2rem;
+        }
+
+        .slot-selection {
+            margin-bottom: 1.5rem;
+        }
+
+        .slot-selection label {
+            display: block;
+            color: #e8eaff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .slot-selection select, .modal-notes input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(79, 172, 254, 0.3);
+            border-radius: 15px;
+            color: #e8eaff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .slot-selection select:focus, .modal-notes input:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.2);
+        }
+
+        .modal-notes label {
+            color: #e8eaff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .modal-quantity {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .modal-quantity button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .modal-quantity button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+        }
+
+        .modal-quantity span {
+            color: #e8eaff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .add-to-basket-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #2ed573 0%, #1abc9c 100%);
+            color: #fff;
+            border: none;
+            padding: 1.2rem 2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(46, 213, 115, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-to-basket-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .add-to-basket-btn:hover::before {
+            left: 100%;
+        }
+
+        .add-to-basket-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(46, 213, 115, 0.6);
+        }
+
+        /* Cart Modal Styling */
+        .cart-modal-title {
+            color: #4facfe;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .cart-modal-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+        }
+
+        .cart-modal-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-top: 1px solid rgba(79, 172, 254, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .cart-modal-subtotal-label {
+            color: #e8eaff;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .cart-modal-subtotal-value {
+            color: #2ed573;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .cart-modal-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-secondary, .btn-primary {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: rgba(156, 163, 175, 0.2);
+            color: #9ca3af;
+            border: 1px solid rgba(156, 163, 175, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(156, 163, 175, 0.3);
+            color: #e8eaff;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .navbar-left {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+                margin: 1rem 0 2rem;
+            }
+
+            .clothes-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                padding: 0 1rem 3rem;
+            }
+
+            .clothes-card {
+                padding: 1.5rem;
+            }
+
+            .checkout-modal, .cart-modal {
+                margin: 1rem;
+                padding: 2rem;
+                max-width: none;
+            }
+
+            .cart-modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .clothes-grid {
+                grid-template-columns: 1fr;
+                padding: 0 1rem 2rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="navbar-left">
+        <h2 class="logo">LaundryApp</h2>
+        <ul class="nav-links">
+            <li><a href="dashboard">Home</a></li>
+            <li><a href="#services">Our Services</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#contact">Contact Us</a></li>
+        </ul>
+    </div>
+    <div class="navbar-right">
+        <button class="wash-bag-btn" onclick="toggleCartModal()">
+            <i class="fas fa-shopping-basket"></i>
+            <span class="cart-count" id="cartCount">0</span>
+            Wash Bag
+        </button>
+    </div>
+</div>
+
+<div class="breadcrumb">
+    <span>Home</span> <i class="fas fa-chevron-right"></i> <span>Schedule an order</span>
+</div>
+
+<h1 class="page-title" id="serviceTypeTitle">Dry Cleaning</h1>
+
+<div class="clothes-grid">
+    <div class="clothes-card" onclick="openCheckoutModal('Denims', '/images/Denims.jpg', 500)">
+        <img src="/images/Denims.jpg" alt="Denims">
+        <span>Denims</span>
+    </div>
+    <div class="clothes-card" onclick="openCheckoutModal('Shirt', '/images/Shirt.jpg', 450)">
+        <img src="/images/Shirt.jpg" alt="Shirt">
+        <span>Shirt</span>
+    </div>
+    <div class="clothes-card" onclick="openCheckoutModal('T-Shirt', '/images/T-shirt.jpg', 400)">
+        <img src="/images/T-shirt.jpg" alt="T-Shirt">
+        <span>T-Shirt</span>
+    </div>
+    <div class="clothes-card" onclick="openCheckoutModal('Suits', '/images/Suits.jpg', 550)">
+        <img src="/images/Suits.jpg" alt="Suits">
+        <span>Suits</span>
+    </div>
+    <div class="clothes-card" onclick="openCheckoutModal('Trouser', '/images/Trouser.jpg', 350)">
+        <img src="/images/Trouser.jpg" alt="Trouser">
+        <span>Trouser</span>
+    </div>
+    <div class="clothes-card" onclick="openCheckoutModal('BedSheets', '/images/BedSheets.jpg', 400)">
+        <img src="/images/BedSheets.jpg" alt="BedSheets">
+        <span>BedSheets</span>
+    </div>
+    <div class="clothes-card" onclick="openCheckoutModal('Curtains', '/images/Curtains.jpg', 420)">
+        <img src="/images/Curtains.jpg" alt="Curtains">
+        <span>Curtains</span>
+    </div>
+
+   
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-bg" id="checkoutModalBg" style="display:none;">
+    <div class="checkout-modal" id="checkoutModal">
+        <span class="close-modal" onclick="closeCheckoutModal()">&times;</span>
+        <img id="modalClothImg" src="" alt="Cloth" class="modal-cloth-img">
+        <div class="modal-details">
+            <h2 id="modalClothName">Shirt</h2>
+            <div class="modal-price">Rs <span id="modalClothPrice">450.00</span></div>
+            <div class="modal-service-type">Service: <span id="modalServiceType">Dry Cleaning</span></div>
+            <div class="modal-delivery-slots">
+                <div class="slot-selection">
+                    <label for="modalPickupSlot">Pickup Time Slot:</label>
+                    <select id="modalPickupSlot" required>
+                        <option value="">Select pickup slot</option>
+                    </select>
+                </div>
+                <div class="slot-selection">
+                    <label for="modalDeliverySlot">Delivery Time Slot:</label>
+                    <select id="modalDeliverySlot" required>
+                        <option value="">Select delivery slot</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-notes">
+                <label for="modalNotes">Special Notes?</label>
+                <input type="text" id="modalNotes" placeholder="Any instructions?">
+            </div>
+            <div class="modal-quantity">
+                <button onclick="changeModalQty(-1)">−</button>
+                <span id="modalQty">1</span>
+                <button onclick="changeModalQty(1)">+</button>
+            </div>
+            <button class="add-to-basket-btn" onclick="addModalToCart()">Add To Basket</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cart Modal -->
+<div class="modal-bg" id="cartModalBg" style="display:none;">
+    <div class="cart-modal" id="cartModal">
+        <span class="close-modal" onclick="closeCartModal()">&times;</span>
+        <h2 class="cart-modal-title">Washing Basket</h2>
+        <div class="cart-modal-items" id="cartModalItems">
+            <!-- Cart items will be rendered here by JS -->
+        </div>
+        <div class="cart-modal-summary">
+            <span class="cart-modal-subtotal-label">Subtotal</span>
+            <span class="cart-modal-subtotal-value" id="cartModalSubtotal">Rs 0.00</span>
+        </div>
+        <div class="cart-modal-actions">
+            <button class="btn-secondary" onclick="closeCartModal()">&laquo; Add More</button>
+            <button class="btn-primary" onclick="checkoutCart()">Checkout &raquo;</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/select-clothes.js"></script>
+</body>
+</html>

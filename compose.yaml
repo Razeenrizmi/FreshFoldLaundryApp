@@ -1,0 +1,10 @@
+services:
+  my-laundry:
+    image: postgres:alpine
+    container_name: my-laundry
+    restart: always
+    ports:
+      - "13308:3308"
+    environment:
+      POSTGRES_PASSWORD: "razeen123"
+

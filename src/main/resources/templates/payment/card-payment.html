@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Payment - FreshFold</title>
+    <link rel="stylesheet" th:href="@{/css/payment.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <style>
+        .card-form {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-visual {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 30px;
+            min-height: 180px;
+            position: relative;
+        }
+        .card-number {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin: 20px 0;
+        }
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .amount-display {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #28a745;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">FreshFold</h1>
+            <div class="nav-links">
+                <a th:href="@{/customer-dashboard}">Dashboard</a>
+                <a th:href="@{/payment/dashboard}">Back to Payment</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>💳 Card Payment</h1>
+
+        <div class="amount-display">
+            Amount to Pay: <span th:text="'Rs ' + ${amount}">Rs 0.00</span>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="card-form">
+            <!-- Card Visual -->
+            <div class="card-visual">
+                <div style="text-align: right; font-size: 1.2rem;">💳</div>
+                <div class="card-number" id="cardDisplay">**** **** **** ****</div>
+                <div class="card-details">
+                    <div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">CARDHOLDER NAME</div>
+                        <div id="nameDisplay">YOUR NAME</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">EXPIRES</div>
+                        <div id="expiryDisplay">MM/YY</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Form -->
+            <form th:action="@{/payment/card/process}" method="post">
+                <!-- Hidden field to pass the amount parameter -->
+                <input type="hidden" name="amount" th:value="${amount}">
+
+                <div class="form-group">
+                    <label for="cardholderName">Cardholder Name</label>
+                    <input type="text" id="cardholderName" name="cardholderName"
+                           placeholder="Enter cardholder name" required
+                           oninput="updateCardDisplay()">
+                </div>
+
+                <div class="form-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" name="cardNumber"
+                           placeholder="1234 5678 9012 3456"
+                           maxlength="19" required
+                           oninput="formatCardNumber(this); updateCardDisplay()">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiryDate">Expiry Date</label>
+                        <input type="text" id="expiryDate" name="expiryDate"
+                               placeholder="MM/YY" maxlength="5" required
+                               oninput="formatExpiry(this); updateCardDisplay()">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input type="password" id="cvv" name="cvv"
+                               placeholder="123" maxlength="4" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large">
+                        Pay Rs <span th:text="${amount}">0.00</span>
+                    </button>
+                    <a th:href="@{/payment/dashboard}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function formatCardNumber(input) {
+            let value = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            input.value = formattedValue;
+        }
+
+        function formatExpiry(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            input.value = value;
+        }
+
+        function updateCardDisplay() {
+            const cardNumber = document.getElementById('cardNumber').value || '**** **** **** ****';
+            const cardholderName = document.getElementById('cardholderName').value || 'YOUR NAME';
+            const expiryDate = document.getElementById('expiryDate').value || 'MM/YY';
+
+            document.getElementById('cardDisplay').textContent = cardNumber;
+            document.getElementById('nameDisplay').textContent = cardholderName.toUpperCase();
+            document.getElementById('expiryDisplay').textContent = expiryDate;
+        }
+    </script>
+</body>
+</html>

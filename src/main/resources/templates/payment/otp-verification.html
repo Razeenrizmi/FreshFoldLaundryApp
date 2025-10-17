@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification - FreshFold</title>
+    <link rel="stylesheet" th:href="@{/css/payment.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <style>
+        .otp-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .otp-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .otp-input {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        .otp-digit {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .otp-digit:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .card-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">FreshFold</h1>
+        </div>
+    </nav>
+
+    <div class="otp-container">
+        <div class="otp-icon">📱</div>
+        <h1>Verify Payment</h1>
+        <p>Please enter the OTP sent to your registered mobile number</p>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="card-info">
+            <p><strong>Cardholder:</strong> <span th:text="${cardholderName}">Name</span></p>
+            <p><strong>Amount:</strong> Rs <span th:text="${amount}">0.00</span></p>
+        </div>
+
+        <form th:action="@{/payment/otp/verify}" method="post" onsubmit="combineOtp()">
+            <div class="otp-input">
+                <input type="text" class="otp-digit" maxlength="1" oninput="moveToNext(this, 0)" onkeydown="moveToPrev(this, event)">
+                <input type="text" class="otp-digit" maxlength="1" oninput="moveToNext(this, 1)" onkeydown="moveToPrev(this, event)">
+                <input type="text" class="otp-digit" maxlength="1" oninput="moveToNext(this, 2)" onkeydown="moveToPrev(this, event)">
+                <input type="text" class="otp-digit" maxlength="1" oninput="moveToNext(this, 3)" onkeydown="moveToPrev(this, event)">
+                <input type="text" class="otp-digit" maxlength="1" oninput="moveToNext(this, 4)" onkeydown="moveToPrev(this, event)">
+                <input type="text" class="otp-digit" maxlength="1" oninput="moveToNext(this, 5)" onkeydown="moveToPrev(this, event)">
+            </div>
+
+            <input type="hidden" id="otp" name="otp">
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large">Verify & Complete Payment</button>
+                <a th:href="@{/payment/card}" class="btn btn-secondary">Back</a>
+            </div>
+        </form>
+
+        <div style="margin-top: 20px;">
+            <p class="text-muted">For demo purposes, use OTP: <strong>123456</strong></p>
+        </div>
+    </div>
+
+    <script>
+        function moveToNext(current, index) {
+            if (current.value.length === 1) {
+                const nextInput = current.parentElement.children[index + 1];
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+        }
+
+        function moveToPrev(current, event) {
+            if (event.key === 'Backspace' && current.value === '') {
+                const prevInput = current.previousElementSibling;
+                if (prevInput) {
+                    prevInput.focus();
+                }
+            }
+        }
+
+        function combineOtp() {
+            const inputs = document.querySelectorAll('.otp-digit');
+            let otp = '';
+            inputs.forEach(input => otp += input.value);
+            document.getElementById('otp').value = otp;
+            return otp.length === 6;
+        }
+
+        // Auto-focus first input
+        window.onload = function() {
+            document.querySelector('.otp-digit').focus();
+        }
+    </script>
+</body>
+</html>

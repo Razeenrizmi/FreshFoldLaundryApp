@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - LaundryApp</title>
+    <link rel="stylesheet" href="/css/staff-dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <h2>FreshFold Staff</h2>
+        </div>
+        <div class="navbar-menu">
+            <a href="/profile" class="nav-link">Profile</a>
+            <a href="/staff/tasks" class="nav-link">My Tasks</a>
+            <div class="user-profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Staff</span>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1>Staff Dashboard</h1>
+
+            <!-- Welcome Message -->
+            <div class="welcome-message">
+                <h2>Welcome, Staff Member!</h2>
+                <p>Manage your assigned tasks and track your daily progress</p>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon assigned">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${assignedTasks != null ? #lists.size(assignedTasks) : 0}">0</h3>
+                    <p>Assigned Tasks</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon progress">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${inProgressTasks != null ? #lists.size(inProgressTasks) : 0}">0</h3>
+                    <p>In Progress</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon completed">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${completedTasks != null ? #lists.size(completedTasks) : 0}">0</h3>
+                    <p>Completed Today</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${tasks != null ? #lists.size(tasks) : 0}">0</h3>
+                    <p>Total Tasks</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="quick-action" onclick="filterTasks('assigned')">
+                <i class="fas fa-clock"></i>
+                <span>View Assigned</span>
+            </div>
+            <div class="quick-action" onclick="filterTasks('in-progress')">
+                <i class="fas fa-play"></i>
+                <span>In Progress</span>
+            </div>
+            <div class="quick-action" onclick="filterTasks('completed')">
+                <i class="fas fa-check"></i>
+                <span>Completed</span>
+            </div>
+            <div class="quick-action" onclick="showAllTasks()">
+                <i class="fas fa-list"></i>
+                <span>All Tasks</span>
+            </div>
+        </div>
+
+        <!-- Tasks Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="fas fa-clipboard-list"></i> My Tasks</h2>
+                <span class="section-count" th:text="${tasks != null ? #lists.size(tasks) + ' tasks' : '0 tasks'}">0 tasks</span>
+            </div>
+            <div class="table-container">
+                <table class="data-table" th:if="${tasks != null and !#lists.isEmpty(tasks)}">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Service</th>
+                            <th>Customer</th>
+                            <th>Special Instructions</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Pickup Date</th>
+                            <th>Delivery Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="task : ${assignedTasks}">
+                            <td th:text="'#' + ${task.orderId}">#001</td>
+                            <td>
+                                <div class="service-info">
+                                    <span th:text="${task.serviceType}">Wash & Fold</span>
+                                    <small th:text="${task.clothType}">Mixed Items</small>
+                                </div>
+                            </td>
+                            <td th:text="${task.customerId}">Customer ID</td>
+                            <td>
+                                <div class="instructions-cell">
+                                    <span th:if="${task.specialInstructions != null and !#strings.isEmpty(task.specialInstructions)}"
+                                          th:text="${task.specialInstructions}"
+                                          class="instructions-text">Special instructions</span>
+                                    <span th:if="${task.specialInstructions == null or #strings.isEmpty(task.specialInstructions)}"
+                                          class="no-instructions">No special instructions</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="task-status">
+                                    <span class="status-dot"
+                                          th:classappend="${task.status != null ? (task.status.toLowerCase().replace('_', '-').replace(' ', '-')) : 'assigned'}"></span>
+                                    <span class="status-badge"
+                                          th:classappend="${task.status != null ? (task.status.toLowerCase().replace('_', '-').replace(' ', '-')) : 'assigned'}"
+                                          th:text="${task.status}">Assigned</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="priority-badge normal">Normal</span>
+                            </td>
+                            <td>
+                                <div class="date-cell">
+                                    <span th:if="${task.pickupDate != null}"
+                                          th:text="${#temporals.format(task.pickupDate, 'dd/MM/yyyy')}"
+                                          class="date-value">26/09/2025</span>
+                                    <span th:if="${task.pickupDate == null}"
+                                          class="date-na">Not set</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-cell">
+                                    <span th:if="${task.deliveryDate != null}"
+                                          th:text="${#temporals.format(task.deliveryDate, 'dd/MM/yyyy')}"
+                                          class="date-value">28/09/2025</span>
+                                    <span th:if="${task.deliveryDate == null}"
+                                          class="date-na">Not set</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button th:if="${task.status == 'CONFIRMED' or task.status == 'ASSIGNED'}"
+                                            class="btn-start"
+                                            th:onclick="'startTask(' + ${task.orderId} + ')'">
+                                        <i class="fas fa-play"></i> Start
+                                    </button>
+                                    <button th:if="${task.status == 'IN_PROGRESS'}"
+                                            class="btn-complete"
+                                            th:onclick="'completeTask(' + ${task.orderId} + ')'">
+                                        <i class="fas fa-check"></i> Complete
+                                    </button>
+                                    <button class="btn-view"
+                                            th:onclick="'viewTask(' + ${task.orderId} + ')'">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" th:if="${tasks == null or #lists.isEmpty(tasks)}">
+                    <i class="fas fa-clipboard"></i>
+                    <p>No tasks assigned yet. Check back later for new assignments.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <div class="notification-content">
+            <i class="notification-icon"></i>
+            <span class="notification-message"></span>
+        </div>
+    </div>
+
+    <form id="csrf-form" th:action="@{/staff/update-task-status}" method="post" style="display:none;">
+        <input type="hidden" id="_csrf" name="_csrf" th:value="${_csrf.token}" th:name="${_csrf.parameterName}" />
+    </form>
+
+    <script>
+        // Task management functions
+        function startTask(orderId) {
+            if (confirm('Start working on this task?')) {
+                updateTaskStatus(orderId, 'IN_PROGRESS');
+            }
+        }
+
+        function completeTask(orderId) {
+            if (confirm('Mark this task as completed?')) {
+                updateTaskStatus(orderId, 'COMPLETED');
+            }
+        }
+
+        function viewTask(orderId) {
+            // Implement view task details
+            alert('View task details for Order #' + orderId);
+        }
+
+        function getCsrfToken() {
+            const csrfInput = document.getElementById('_csrf');
+            return csrfInput ? csrfInput.value : '';
+        }
+
+        function updateTaskStatus(orderId, status) {
+            // Make AJAX call to update task status
+            fetch('/staff/update-task-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    orderId: orderId,
+                    status: status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Task status updated successfully', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification('Failed to update task status', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error updating task status', 'error');
+            });
+        }
+
+        function filterTasks(status) {
+            // Implement task filtering
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const statusBadge = row.querySelector('.status-badge');
+                if (statusBadge) {
+                    const taskStatus = statusBadge.textContent.toLowerCase().replace(' ', '-');
+                    if (status === 'assigned' && (taskStatus === 'confirmed' || taskStatus === 'assigned')) {
+                        row.style.display = '';
+                    } else if (taskStatus.includes(status)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        function showAllTasks() {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.style.display = '';
+            });
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationMessage = notification.querySelector('.notification-message');
+            const notificationIcon = notification.querySelector('.notification-icon');
+
+            notificationMessage.textContent = message;
+            notification.className = `notification ${type}`;
+
+            if (type === 'success') {
+                notificationIcon.className = 'notification-icon fas fa-check-circle';
+            } else {
+                notificationIcon.className = 'notification-icon fas fa-exclamation-circle';
+            }
+
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>View Profile</title>
+</head>
+<body>
+<h1>User Profile</h1>
+<p>Name: <span th:text="${profile.firstName}"></span> <span th:text="${profile.lastName}"></span></p>
+<p>Phone: <span th:text="${profile.phoneNumber}"></span></p>
+<p>Address: <span th:text="${profile.address}"></span></p>
+<a th:href="@{/profile/edit}">Edit Profile</a>
+</body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laundry Services - FreshFold</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Enhanced Navbar */
+        .navbar {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95) 0%, rgba(45, 53, 97, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(79, 172, 254, 0.3);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: #e8eaff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.1) 100%);
+            transition: left 0.3s ease;
+        }
+
+        .nav-links a:hover::before {
+            left: 0;
+        }
+
+        .nav-links a:hover {
+            color: #4facfe;
+            transform: translateY(-2px);
+        }
+
+        .wash-bag-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wash-bag-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .wash-bag-btn:hover::before {
+            left: 100%;
+        }
+
+        .wash-bag-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+        }
+
+        /* Enhanced Cart Dropdown */
+        .cart-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 2rem;
+            width: 400px;
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95) 0%, rgba(45, 53, 97, 0.95) 100%);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            margin-top: 1rem;
+            padding: 2rem;
+            display: none;
+        }
+
+        .cart-header h3 {
+            color: #4facfe;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-items-count {
+            color: rgba(232, 234, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cart-total {
+            color: #2ed573;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .cart-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-secondary, .btn-primary {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: rgba(156, 163, 175, 0.2);
+            color: #9ca3af;
+            border: 1px solid rgba(156, 163, 175, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(156, 163, 175, 0.3);
+            color: #e8eaff;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+        }
+
+        /* Enhanced Service Cards Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            padding: 4rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.8) 0%, rgba(45, 53, 97, 0.9) 100%);
+            border-radius: 25px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            border: 1px solid rgba(79, 172, 254, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(79, 172, 254, 0.4);
+            border-color: #4facfe;
+        }
+
+        .card__body {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card__body-cover {
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card__body-cover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(transparent, rgba(26, 31, 58, 0.9));
+        }
+
+        .card__body-cover-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.4s ease;
+        }
+
+        .card:hover .card__body-cover-image {
+            transform: scale(1.1);
+        }
+
+        .card__body-header {
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .card__body-header-title {
+            color: #4facfe;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card__body-header-subtitle {
+            color: rgba(232, 234, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        /* Enhanced Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(232, 234, 255, 0.8);
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            line-height: 1.6;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .navbar-left {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .cart-dropdown {
+                width: 90vw;
+                right: 5vw;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 2rem 1rem;
+            }
+
+            .card {
+                margin: 0 1rem;
+            }
+
+            .card__body-header {
+                padding: 1.5rem;
+            }
+
+            .card__body-header-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .hero-section {
+                padding: 2rem 1rem 1rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 2rem 0.5rem;
+            }
+        }
+
+        /* Floating elements animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .card:nth-child(2) {
+            animation: fadeInUp 0.6s ease forwards, float 6s ease-in-out infinite;
+            animation-delay: 0.2s, 2s;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-left">
+        <h2 class="logo">FreshFold</h2>
+        <ul class="nav-links">
+            <li><a href="dashboard">Home</a></li>
+            <li><a href="#services">Our Services</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#contact">Contact Us</a></li>
+        </ul>
+    </div>
+    <div class="navbar-right">
+        <button class="wash-bag-btn" onclick="toggleCart()">
+            <i class="fas fa-shopping-basket"></i>
+            Wash Bag
+        </button>
+    </div>
+</div>
+
+<!-- Cart Dropdown -->
+<div class="cart-dropdown" id="cartDropdown">
+    <div class="cart-header">
+        <h3><i class="fas fa-shopping-basket"></i> Washing Basket</h3>
+        <span class="cart-items-count" id="cartItemsCount">0 items in your basket</span>
+    </div>
+    <div class="cart-items" id="cartItems">
+        <!-- Cart items will be populated here -->
+    </div>
+    <div class="cart-footer">
+        <div class="cart-total">
+            Subtotal: Rs <span id="cartTotal">0.00</span>
+        </div>
+        <div class="cart-actions">
+            <button class="btn-secondary" onclick="closeCart()">« Add More</button>
+            <button class="btn-primary" onclick="checkout()">Checkout »</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <h1 class="hero-title">Premium Laundry Services</h1>
+    <p class="hero-subtitle">Experience professional cleaning with our state-of-the-art facilities and eco-friendly processes. Quality you can trust, convenience you'll love.</p>
+</div>
+
+<div class="grid">
+    <div class="card" id="wash-fold" onclick="redirectToClothes('Wash & Fold')">
+        <div class="card__body">
+            <div class="card__body-cover">
+                <img class="card__body-cover-image" src="/images/WashnFold.jpg" alt="Wash & Fold">
+            </div>
+            <header class="card__body-header">
+                <h2 class="card__body-header-title">Wash & Fold</h2>
+                <p class="card__body-header-subtitle">Freshly washed and folded with care using premium detergents and fabric softeners</p>
+            </header>
+        </div>
+    </div>
+
+    <div class="card" id="ironing" onclick="redirectToClothes('Ironing')">
+        <div class="card__body">
+            <div class="card__body-cover">
+                <img class="card__body-cover-image" src="/images/Ironing.jpg" alt="Ironing">
+            </div>
+            <header class="card__body-header">
+                <h2 class="card__body-header-title">Ironing</h2>
+                <p class="card__body-header-subtitle">Perfectly pressed clothes with professional steam ironing techniques</p>
+            </header>
+        </div>
+    </div>
+
+    <div class="card" id="dry-clean" onclick="redirectToClothes('Dry Cleaning')">
+        <div class="card__body">
+            <div class="card__body-cover">
+                <img class="card__body-cover-image" src="/images/DryClean.jpg" alt="Dry Cleaning">
+            </div>
+            <header class="card__body-header">
+                <h2 class="card__body-header-title">Dry Cleaning</h2>
+                <p class="card__body-header-subtitle">Professional care for delicates using advanced dry cleaning methods</p>
+            </header>
+        </div>
+    </div>
+</div>
+
+<script src="/js/index.js"></script>
+</body>
+</html>

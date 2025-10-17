@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Laundry Order Form - FreshFold</title>
+    <link rel="stylesheet" th:href="@{/css/order.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <style>
+        .error {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        .order-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">FreshFold</h1>
+            <div class="nav-links">
+                <a th:href="@{/customer-dashboard}">Dashboard</a>
+                <a th:href="@{/order/browse}">Browse Clothes</a>
+                <a th:href="@{/order/cart}">Basket</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Complete Your Laundry Order</h1>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <p><strong>Total Amount: </strong><span th:text="'Rs ' + ${totalAmount}">Rs 0.00</span></p>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/order/form/submit}" th:object="${order}" method="post" onsubmit="return validateDates()">
+            <!-- Customer Details -->
+            <div class="form-section">
+                <h2>Customer Details</h2>
+
+                <div class="form-group">
+                    <label for="customerName">Name:</label>
+                    <input type="text" id="customerName" name="customerName" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="customerEmail">Email:</label>
+                    <input type="email" id="customerEmail" name="customerEmail" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="customerAddress">Address:</label>
+                    <textarea id="customerAddress" name="customerAddress" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="customerPhone">Phone Number:</label>
+                    <input type="tel" id="customerPhone" name="customerPhone" pattern="[0-9]{10}" title="Must be exactly 10 digits" required />
+                </div>
+            </div>
+
+            <!-- Service Type -->
+            <div class="form-section">
+                <h2>Service Type</h2>
+                <select id="serviceType" th:field="*{serviceType}" required>
+                    <option value="">Select Service</option>
+                    <option value="Washing">Washing</option>
+                    <option value="Ironing">Ironing</option>
+                    <option value="Dry Cleaning">Dry Cleaning</option>
+                    <option value="Washing + Ironing">Washing + Ironing</option>
+                    <option value="Full Service">Full Service</option>
+                </select>
+            </div>
+
+            <!-- Pickup and Delivery Details -->
+            <div class="form-section">
+                <h2>Pickup and Delivery Details</h2>
+
+                <div class="form-group">
+                    <label for="pickupDatetime">Preferred Pickup Date and Time:</label>
+                    <input type="datetime-local" id="pickupDatetime" th:field="*{pickupDatetime}" required />
+                    <div class="error" th:if="${#fields.hasErrors('pickupDatetime')}" th:errors="*{pickupDatetime}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="deliveryDatetime">Preferred Delivery Date and Time:</label>
+                    <input type="datetime-local" id="deliveryDatetime" th:field="*{deliveryDatetime}" required />
+                    <div class="error" th:if="${#fields.hasErrors('deliveryDatetime')}" th:errors="*{deliveryDatetime}"></div>
+                </div>
+            </div>
+
+            <!-- Special Instructions -->
+            <div class="form-section">
+                <h2>Special Instructions</h2>
+                <textarea id="specialInstructions" th:field="*{specialInstructions}" rows="4"
+                         placeholder="Any special instructions for handling your laundry..."></textarea>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <!-- Comment: Original redirect to scheduling -->
+                <!-- <a th:href="@{/schedule}" class="checkout-btn">Schedule Pickup & Delivery</a> -->
+
+                <!-- New: Direct redirect to payment -->
+                <button type="submit" class="btn btn-primary btn-large">Proceed to Payment</button>
+                <a th:href="@{/order/cart}" class="btn btn-secondary">Back to Basket</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function validateDates() {
+            const pickup = new Date(document.getElementById('pickupDatetime').value);
+            const delivery = new Date(document.getElementById('deliveryDatetime').value);
+            const now = new Date();
+
+            if (pickup <= now || delivery <= now) {
+                alert("Pickup and delivery dates must be in the future.");
+                return false;
+            }
+            if (delivery <= pickup) {
+                alert("Delivery date must be after pickup date.");
+                return false;
+            }
+            return true;
+        }
+
+        window.onload = function() {
+            const now = new Date();
+            // Set minimum date to tomorrow
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const minDate = tomorrow.toISOString().slice(0, 16);
+
+            document.getElementById('pickupDatetime').min = minDate;
+            document.getElementById('deliveryDatetime').min = minDate;
+        };
+    </script>
+</body>
+</html>

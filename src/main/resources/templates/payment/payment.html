@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Payment - LaundryApp</title>
+    <link rel="stylesheet" href="/css/payment.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <h2 class="logo">LaundryApp</h2>
+            <ul class="nav-links">
+                <li><a href="/dashboard">Home</a></li>
+                <li><a href="#services">Our Services</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
+        </div>
+        <div class="navbar-right">
+            <button class="wash-bag-btn" onclick="window.location.href='/dashboard'">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success">
+        <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-error">
+        <span th:text="${error}"></span>
+    </div>
+
+    <div class="payment-container">
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            <div class="order-items" id="orderItems">
+                <div class="order-item">
+                    <span>Wash & Fold Service</span>
+                    <span>Rs 500.00</span>
+                </div>
+            </div>
+            <div class="order-totals">
+                <div class="subtotal-row">
+                    <span>Subtotal</span>
+                    <span id="subtotalAmount">Rs 500.00</span>
+                </div>
+                <div class="tax-row">
+                    <span>VAT 15%</span>
+                    <span id="taxAmount">Rs 75.00</span>
+                </div>
+                <div class="delivery-row">
+                    <span>Delivery</span>
+                    <span id="deliveryAmount">Rs 200.00</span>
+                </div>
+                <div class="total-row">
+                    <span>TOTAL</span>
+                    <span id="totalAmount">Rs 775.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traditional HTML Form -->
+        <form class="payment-form" onsubmit="event.preventDefault(); processPayment();">
+            <h2>Payment Method</h2>
+
+            <div class="payment-options">
+                <div class="payment-option">
+                    <input type="radio" id="cardPayment" name="paymentMethod" value="card" checked onchange="togglePaymentForms()">
+                    <label for="cardPayment">
+                        <i class="fas fa-credit-card"></i>
+                        Credit/Debit Card
+                    </label>
+                </div>
+                <div class="payment-option">
+                    <input type="radio" id="cashOnDelivery" name="paymentMethod" value="cod" onchange="togglePaymentForms()">
+                    <label for="cashOnDelivery">
+                        <i class="fas fa-money-bill-wave"></i>
+                        Cash on Delivery
+                    </label>
+                </div>
+            </div>
+
+            <!-- Card Payment Form -->
+            <div class="card-form" id="cardForm">
+                <div class="card-type-selector">
+                    <label for="cardType">Please select your card:</label>
+                    <select id="cardType" name="cardType">
+                        <option value="visa">Visa</option>
+                        <option value="mastercard">Mastercard</option>
+                        <option value="amex">American Express</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+
+                <div class="form-group">
+                    <label for="cardHolder">Card Holder</label>
+                    <input type="text" id="cardHolder" name="cardHolder" placeholder="John Doe">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expires">Expires</label>
+                        <input type="text" id="expires" name="expires" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvc">CVC</label>
+                        <input type="text" id="cvc" name="cvc" placeholder="123" maxlength="4">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cash on Delivery Form -->
+            <div class="cod-form" id="codForm" style="display: none;">
+                <div class="cod-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <h3>Cash on Delivery</h3>
+                        <p>You will pay the total amount when your order is delivered to your address. Please have the exact amount ready.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="codName">Full Name</label>
+                    <input type="text" id="codName" name="codName" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="codPhone">Phone Number</label>
+                    <input type="tel" id="codPhone" name="codPhone" placeholder="+94 71 234 5678">
+                </div>
+                <div class="form-group">
+                    <label for="codAddress">Delivery Address</label>
+                    <textarea id="codAddress" name="codAddress" rows="3" placeholder="Enter your complete delivery address"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="checkout-btn">
+                <span id="checkoutBtnText">Place Order</span>
+            </button>
+        </form>
+    </div>
+
+    <script src="/js/payment.js"></script>
+    <script>
+        // Simple function to toggle between card and COD forms
+        function togglePaymentForms() {
+            const cardForm = document.getElementById('cardForm');
+            const codForm = document.getElementById('codForm');
+            const cardRadio = document.getElementById('cardPayment');
+
+            if (cardRadio.checked) {
+                cardForm.style.display = 'block';
+                codForm.style.display = 'none';
+            } else {
+                cardForm.style.display = 'none';
+                codForm.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

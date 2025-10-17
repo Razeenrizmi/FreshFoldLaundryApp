@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cash on Delivery</title>
+    <style>
+        body {
+            background-color: #0a1f44;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 30px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background-color: #1e3a8a;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #10b981;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #22c55e;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Confirm Cash on Delivery</h2>
+    <form th:action="@{/payments/pay/cod}" method="post">
+        <input type="hidden" name="orderId" th:value="${orderId}" />
+        <input type="hidden" name="amount" th:value="${amount}" />
+        <button type="submit">Confirm COD</button>
+    </form>
+</div>
+</body>
+</html>

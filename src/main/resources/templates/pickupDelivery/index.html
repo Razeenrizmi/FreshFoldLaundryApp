@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshFold Laundry - Professional Laundry Services</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <span>🧺</span>
+                <h1>FreshFold Laundry</h1>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a th:href="@{/}" class="active">Home</a></li>
+                    <li><a th:href="@{/schedule}">Schedule Pickup</a></li>
+                    <li><a th:href="@{/track}">Track Order</a></li>
+                    <li><a th:href="@{/coordinator}">Coordinator</a></li>
+                    <li><a th:href="@{/driver(driverId=1)}">Driver</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Professional Laundry Services</h1>
+            <p>Experience the convenience of premium laundry services with free pickup and delivery. Quality cleaning guaranteed.</p>
+            <a th:href="@{/schedule}" class="btn btn-primary btn-lg">Schedule a Pickup</a>
+            <a th:href="@{/track}" class="btn btn-success btn-lg">Track Your Order</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="container">
+        <div class="features">
+            <div class="card feature-card">
+                <span class="feature-icon">🚚</span>
+                <h3>Free Pickup & Delivery</h3>
+                <p>We come to you. Schedule a time that works best for your busy life.</p>
+            </div>
+
+            <div class="card feature-card">
+                <span class="feature-icon">⚡</span>
+                <h3>Fast Turnaround</h3>
+                <p>Most orders completed within 24 hours. Express service available.</p>
+            </div>
+
+            <div class="card feature-card">
+                <span class="feature-icon">⭐</span>
+                <h3>Quality Guaranteed</h3>
+                <p>Professional cleaning with attention to detail and fabric care.</p>
+            </div>
+
+            <div class="card feature-card">
+                <span class="feature-icon">📱</span>
+                <h3>Real-time Tracking</h3>
+                <p>Track your order from pickup to delivery with live updates.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2024 FreshFold Laundry Management System. All rights reserved.</p>
+        <p style="margin-top: 10px; opacity: 0.8;">
+            <small>Professional laundry services with love and care</small>
+        </p>
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Orders Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<nav class="navbar">
+    <a th:href="@{/order/orders}">Orders</a>
+    <a th:href="@{/order/browse?categoryId=1}">Browse Clothes</a>
+</nav>
+<div class="button-container">
+    <a th:href="@{/order/browse?categoryId=1}" class="new-order-btn">New Order</a>
+</div>
+
+<div class="main-content">
+    <div th:if="${message}" class="success-message" th:text="${message}"></div>
+    <h1>Current Orders</h1>
+    <table class="order-table">
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Service Type</th>
+            <th>Pickup Date</th>
+            <th>Delivery Date</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${currentOrders}">
+            <td><a th:href="@{/order/details/{id}(id=${order.orderId})}" th:text="${order.orderId}" style="text-decoration: none;"></a></td>
+            <td th:text="${order.serviceType}"></td>
+            <td th:text="${order.pickupDatetime}"></td>
+            <td th:text="${order.deliveryDatetime}"></td>
+            <td th:text="${order.status}"></td>
+        </tr>
+        </tbody>
+    </table> </br></br>
+
+    <h1>Completed Orders</h1>
+    <table class="order-table">
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Service Type</th>
+            <th>Pickup Date</th>
+            <th>Delivery Date</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${completedOrders}">
+            <td><a th:href="@{/order/details/{id}(id=${order.orderId})}" th:text="${order.orderId}" style="text-decoration: none;"></a></td>
+            <td th:text="${order.serviceType}"></td>
+            <td th:text="${order.pickupDatetime}"></td>
+            <td th:text="${order.deliveryDatetime}"></td>
+            <td th:text="${order.status}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

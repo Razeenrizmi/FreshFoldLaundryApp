@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Track Orders - FreshFold Laundry</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <span>🧺</span>
+                <h1>FreshFold Laundry</h1>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/schedule}">Schedule Pickup</a></li>
+                    <li><a th:href="@{/track}" class="active">Track Order</a></li>
+                    <li><a th:href="@{/coordinator}">Coordinator</a></li>
+                    <li><a th:href="@{/driver(driverId=1)}">Driver</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <div class="card">
+        <h2>Track Your Orders</h2>
+        <p>Check the status of your laundry orders below.</p>
+    </div>
+
+    <div th:if="${#lists.isEmpty(orders)}" class="alert alert-warning">
+        No orders found
+    </div>
+
+    <div th:unless="${#lists.isEmpty(orders)}">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer ID</th>
+                <th>Service Type</th>
+                <th>Status</th>
+                <th>Pickup Date</th>
+                <th>Delivery Date</th>
+                <th>Order Time</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="order : ${orders}">
+                <td th:text="${order.orderId}"></td>
+                <td th:text="${order.customerId}"></td>
+                <td th:text="${order.serviceType}"></td>
+                <td>
+                    <span class="status-badge" th:classappend="'status-' + ${order.status}" th:text="${#strings.replace(order.status, '_', ' ')}"></span>
+                </td>
+                <td th:text="${order.pickupDate}"></td>
+                <td th:text="${order.deliveryDate}"></td>
+                <td th:text="${#temporals.format(order.orderTime, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2024 FreshFold Laundry Management System. All rights reserved.</p>
+    </div>
+</footer>
+</body>
+</html>

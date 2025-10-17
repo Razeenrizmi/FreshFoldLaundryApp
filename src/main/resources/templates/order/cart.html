@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laundry Basket - FreshFold</title>
+    <link rel="stylesheet" th:href="@{/css/cart.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">FreshFold</h1>
+            <div class="nav-links">
+                <a th:href="@{/customer-dashboard}">Dashboard</a>
+                <a th:href="@{/order/browse}">Browse Clothes</a>
+                <a th:href="@{/order/cart}" class="active">Basket</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="cart-header">
+            <h1>🧺 Your Laundry Basket</h1>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        </div>
+
+        <div class="cart-content">
+            <div th:if="${cartItems.isEmpty()}" class="empty-cart">
+                <div class="empty-cart-icon">🧺</div>
+                <h2>Your basket is empty</h2>
+                <p>Add some clothes to get started with your laundry order!</p>
+                <a th:href="@{/order/browse}" class="btn btn-primary">Browse Clothes</a>
+            </div>
+
+            <div th:unless="${cartItems.isEmpty()}" class="cart-items">
+                <div class="cart-table">
+                    <div class="cart-header-row">
+                        <div class="col-item">Item</div>
+                        <div class="col-quantity">Quantity</div>
+                        <div class="col-price">Unit Price</div>
+                        <div class="col-total">Total</div>
+                    </div>
+
+                    <div th:each="item : ${cartItems}" class="cart-item-row">
+                        <div class="col-item">
+                            <div class="item-info">
+                                <h4 th:text="${item.clothName}">Item Name</h4>
+                            </div>
+                        </div>
+                        <div class="col-quantity">
+                            <span class="quantity-badge" th:text="${item.quantity}">0</span>
+                        </div>
+                        <div class="col-price">
+                            <span th:text="'Rs ' + ${item.unitPrice}">Rs 0.00</span>
+                        </div>
+                        <div class="col-total">
+                            <span class="total-price" th:text="'Rs ' + ${item.totalPrice}">Rs 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cart-summary">
+                    <div class="summary-card">
+                        <div class="summary-header">
+                            <h3>Order Summary</h3>
+                        </div>
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Total Items:</span>
+                                <span th:text="${cartItems.size()}">0</span>
+                            </div>
+                            <div class="summary-row total-row">
+                                <span>Total Amount:</span>
+                                <span class="total-amount" th:text="'Rs ' + ${totalAmount}">Rs 0.00</span>
+                            </div>
+                        </div>
+                        <div class="summary-actions">
+                            <form th:action="@{/order/cart/confirm}" method="post" class="confirm-form">
+                                <button type="submit" class="btn btn-success btn-large">
+                                    Confirm Selection & Continue
+                                </button>
+                            </form>
+                            <a th:href="@{/order/browse}" class="btn btn-secondary">Continue Shopping</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-hide alerts after 3 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

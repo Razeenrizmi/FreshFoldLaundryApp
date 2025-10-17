@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <span>🧺</span>
+                <h1>FreshFold Laundry</h1>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/schedule}">Schedule Pickup</a></li>
+                    <li><a th:href="@{/track}">Track Order</a></li>
+                    <li><a th:href="@{/coordinator}">Coordinator</a></li>
+                    <li><a th:href="@{/driver(driverId=1)}" class="active">Driver</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <strong>Success!</strong> <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <strong>Error!</strong> <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="card">
+        <h2>Driver Dashboard</h2>
+        <p>Manage your assigned pickup and delivery orders</p>
+        <p th:if="${driver != null}"><strong>Welcome:</strong> <span th:text="${driver.name}"></span></p>
+    </div>
+
+    <!-- Driver Tabs -->
+    <div class="tabs" th:if="${drivers != null and !#lists.isEmpty(drivers)}">
+        <div th:each="driverOption : ${drivers}" class="tab" th:classappend="${driverOption.id == driverId} ? 'active' : ''">
+            <a th:href="@{/driver(driverId=${driverOption.id})}" th:text="${driverOption.name}"></a>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(orders)}" class="alert alert-info">
+        <strong>No assigned orders</strong> for <span th:text="${driver != null ? driver.name : 'this driver'}"></span>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(orders)}">
+        <div class="card">
+            <h3>Your Assigned Orders (<span th:text="${#lists.size(orders)}"></span>)</h3>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Assignment Type</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.orderId}"></td>
+                    <td>
+                        <strong th:text="${order.customerName}"></strong><br>
+                        <small th:text="${order.customerPhone}"></small>
+                    </td>
+                    <td th:text="${order.customerAddress}"></td>
+                    <td>
+                        <span class="status-badge" th:classappend="'status-' + ${order.status}" th:text="${#strings.replace(order.status, '_', ' ')}"></span>
+                    </td>
+                    <td>
+                        <span th:if="${order.pickupDriverId == driverId}" class="badge badge-pickup">📋 Pickup</span>
+                        <span th:if="${order.deliveryDriverId == driverId}" class="badge badge-delivery">🚚 Delivery</span>
+                    </td>
+                    <td>
+                        <!-- Pickup Actions -->
+                        <form th:if="${order.pickupDriverId == driverId and order.status == 'pickup_assigned'}"
+                              th:action="@{/driver/updateStatus/{id}(id=${order.orderId})}" method="post" style="display: inline;">
+                            <input type="hidden" name="status" value="picked_up"/>
+                            <input type="hidden" name="driverId" th:value="${driverId}"/>
+                            <button type="submit" class="btn btn-success btn-sm">Mark as Picked Up</button>
+                        </form>
+
+                        <!-- Delivery Actions - Mark as Delivered (only for out_for_delivery status) -->
+                        <form th:if="${order.deliveryDriverId == driverId and order.status == 'out_for_delivery'}"
+                              th:action="@{/driver/updateStatus/{id}(id=${order.orderId})}" method="post" style="display: inline;">
+                            <input type="hidden" name="status" value="delivered"/>
+                            <input type="hidden" name="driverId" th:value="${driverId}"/>
+                            <button type="submit" class="btn btn-success btn-sm">✅ Mark as Delivered</button>
+                        </form>
+
+                        <!-- Status indicators -->
+                        <div th:if="${order.status == 'ready_for_delivery'}" class="text-info">
+                            <small>📦 Ready - Waiting for coordinator to send out</small>
+                        </div>
+
+                        <div th:if="${order.status == 'picked_up'}" class="text-success">
+                            <small>✅ Picked up successfully</small>
+                        </div>
+
+                        <div th:if="${order.status == 'delivered'}" class="text-success">
+                            <small>✅ Delivered successfully</small>
+                        </div>
+
+                        <!-- No action available -->
+                        <div th:if="${order.pickupDriverId != driverId and order.deliveryDriverId != driverId}" class="text-muted">
+                            <small>Not assigned to you</small>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2023 FreshFold Laundry. All rights reserved.</p>
+    </div>
+</footer>
+
+<style>
+.tabs {
+    display: flex;
+    margin: 20px 0;
+    border-bottom: 2px solid #e9ecef;
+}
+.tab {
+    margin-right: 5px;
+}
+.tab a {
+    display: block;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
+    border: 1px solid #dee2e6;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+}
+.tab.active a {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+.badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+.badge-pickup {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+.badge-delivery {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+.status-ready_for_delivery { background-color: #fff3cd; color: #856404; }
+.status-out_for_delivery { background-color: #cce7ff; color: #004085; }
+.status-delivered { background-color: #d4edda; color: #155724; }
+.status-picked_up { background-color: #d1ecf1; color: #0c5460; }
+.alert {
+    padding: 15px;
+    margin: 20px 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+.alert-success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+.alert-danger { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+.text-info { color: #17a2b8; }
+.text-success { color: #28a745; }
+.text-muted { color: #6c757d; }
+</style>
+</body>
+</html>

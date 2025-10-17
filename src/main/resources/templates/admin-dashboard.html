@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LaundryApp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <h2><i class="fas fa-shield-alt"></i> LaundryApp Admin</h2>
+        </div>
+        <div class="navbar-menu">
+            <a href="/admin/admin-dashboard" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="/admin/staff" class="nav-link">
+                <i class="fas fa-users"></i> Staff Management
+            </a>
+            <div class="user-profile">
+                <i class="fas fa-user-circle"></i>
+                <span th:text="${admin.firstName} + ' ' + ${admin.lastName}">Admin User</span>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <div class="welcome-message">
+                <h2>Welcome back, <span th:text="${admin.firstName} + ' ' + ${admin.lastName}">Admin</span>!</h2>
+                <p>Monitor your laundry business performance and manage operations</p>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon orders">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${salesStats.totalOrders}">0</h3>
+                    <p>Total Orders</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon revenue">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="'Rs ' + ${salesStats.totalRevenue}">Rs 0</h3>
+                    <p>Total Revenue</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon staff">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${salesStats.totalActiveStaff}">0</h3>
+                    <p>Active Staff</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon performance">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${performanceStats.completionRate} + '%'">0%</h3>
+                    <p>Completion Rate</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="action-cards">
+            <div class="action-card" onclick="window.location.href='/admin/staff/add'">
+                <i class="fas fa-user-plus"></i>
+                <h3>Add New Staff</h3>
+                <p>Register a new staff member to the system</p>
+                <span class="action-btn">Add Staff</span>
+            </div>
+            <div class="action-card" onclick="window.location.href='/admin/staff'">
+                <i class="fas fa-users-cog"></i>
+                <h3>Manage Staff</h3>
+                <p>View, edit, and manage all staff members</p>
+                <span class="action-btn">Manage Staff</span>
+            </div>
+        </div>
+
+        <!-- Performance Overview -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-bar"></i> Performance Overview</h2>
+            </div>
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <div class="performance-icon completed">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="performance-details">
+                        <h4>Completed Orders</h4>
+                        <span class="performance-value" th:text="${salesStats.completedOrders}">0</span>
+                    </div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-icon pending">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="performance-details">
+                        <h4>Pending Orders</h4>
+                        <span class="performance-value" th:text="${salesStats.pendingOrders}">0</span>
+                    </div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-icon progress">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <div class="performance-details">
+                        <h4>In Progress</h4>
+                        <span class="performance-value" th:text="${salesStats.inProgressOrders}">0</span>
+                    </div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-icon average">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="performance-details">
+                        <h4>Avg Order Value</h4>
+                        <span class="performance-value" th:text="'Rs ' + ${performanceStats.avgOrderValue}">Rs 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Overview -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="fas fa-users"></i> Staff Overview</h2>
+                <a href="/admin/staff" class="section-link">View All Staff</a>
+            </div>
+            <div class="staff-overview-grid">
+                <div class="staff-overview-item">
+                    <div class="staff-icon delivery">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="staff-details">
+                        <h4>Delivery Staff</h4>
+                        <span class="staff-count" th:text="${salesStats.deliveryStaffCount}">0</span>
+                    </div>
+                </div>
+                <div class="staff-overview-item">
+                    <div class="staff-icon regular">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="staff-details">
+                        <h4>Regular Staff</h4>
+                        <span class="staff-count" th:text="${salesStats.regularStaffCount}">0</span>
+                    </div>
+                </div>
+                <div class="staff-overview-item">
+                    <div class="staff-icon manager">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="staff-details">
+                        <h4>Managers</h4>
+                        <span class="staff-count" th:text="${salesStats.managerCount}">0</span>
+                    </div>
+                </div>
+                <div class="staff-overview-item">
+                    <div class="staff-icon productivity">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="staff-details">
+                        <h4>Orders per Staff</h4>
+                        <span class="staff-count" th:text="${performanceStats.ordersPerStaff}">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="fas fa-history"></i> System Status</h2>
+            </div>
+            <div class="system-status">
+                <div class="status-item active">
+                    <i class="fas fa-circle"></i>
+                    <span>All Systems Operational</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-database"></i>
+                    <span>Database Connected</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-server"></i>
+                    <span>Server Status: Online</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh statistics every 30 seconds
+        setInterval(function() {
+            fetch('/admin/api/statistics/sales')
+                .then(response => response.json())
+                .then(data => {
+                    // Update statistics without page reload
+                    console.log('Statistics updated:', data);
+                })
+                .catch(error => console.log('Error updating stats:', error));
+        }, 30000);
+
+        // Add smooth animations to stat cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

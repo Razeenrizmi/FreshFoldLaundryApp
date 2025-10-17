@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Order</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<nav class="navbar">
+    <a th:href="@{/orders}">Orders</a>
+    <a th:href="@{/browse?categoryId=1}">Browse Clothes</a>
+</nav>
+<div class="main-content">
+    <h1>Edit Order</h1>
+    <form th:action="@{/order/update/{id}(id=${order.orderId})}" method="post">
+        <h2><strong>Order ID:</strong> <span th:text="${order.orderId}"></span></h2>
+        <label for="serviceType">Service Type:</label>
+        <select id="serviceType" name="serviceType" required>
+            <option th:value="${order.serviceType}" th:text="${order.serviceType}"></option>
+            <option value="washing">Washing</option>
+            <option value="ironing">Ironing</option>
+            <option value="dry cleaning">Dry Cleaning</option>
+            <option value="folding">Folding</option>
+        </select><br/><br/>
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" th:value="${customer.name}" required /><br/><br/>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" th:value="${customer.email}" required /><br/><br/>
+
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" th:value="${customer.address}" required /><br/><br/>
+
+        <label for="phoneNo">Phone Number:</label>
+        <input type="text" id="phoneNo" name="phoneNo" th:value="${customer.phoneNo}" pattern="[0-9]{10}" required /><br/><br/>
+
+        <label for="pickupDatetimeStr">Pickup Date and Time:</label>
+        <input type="datetime-local"
+               id="pickupDatetimeStr"
+               name="pickupDatetimeStr"
+               th:value="${#temporals.format(order.pickupDatetime, 'yyyy-MM-dd''T''HH:mm')}"
+               required /><br/><br/>
+
+        <label for="deliveryDatetimeStr">Delivery Date and Time:</label>
+        <input type="datetime-local"
+               id="deliveryDatetimeStr"
+               name="deliveryDatetimeStr"
+               th:value="${#temporals.format(order.deliveryDatetime, 'yyyy-MM-dd''T''HH:mm')}"
+               required /><br/><br/>
+
+
+
+        <button type="submit">Update Order</button>
+    </form>
+
+    <h2>Special Requests</h2>
+    <form th:action="@{/order/update-requests/{id}(id=${order.orderId})}" method="post">
+        <div th:each="request, iter : ${specialRequests}">
+            <div class="request-row">
+                <input type="text" name="specialRequests" th:value="${request.name}" />
+                <a th:href="@{/order/delete-request/{id}(id=${order.orderId}, name=${request.name})}" class="delete-request-btn">X</a>
+            </div>
+        </div>
+        <!-- Add new request -->
+        <input type="text" name="specialRequests" placeholder="New request" /><br/>
+        <button type="submit">Update Requests</button>
+    </form>
+
+    <h2>Selected Clothes</h2>
+    <table class="cart-table">
+        <thead>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${orderItems}">
+            <td><img th:src="@{{path}(path=${item[3]})}" alt="Cloth Image" class="cloth-image" /></td>
+            <td th:text="${item[1]}"></td>
+            <td>
+                <form th:action="@{/order/update-item-quantity/{id}(id=${order.orderId})}" method="post">
+                    <input type="hidden" name="clothId" th:value="${item[4]}" /> <!--Assuming clothId added to Object[] at index 4; adjust if needed -->
+                    <button type="button" onclick="decrement(this)">-</button>
+                    <input type="number" name="quantity" th:value="${item[0]}" min="0" readonly />
+                    <button type="button" onclick="increment(this)">+</button>
+                    <button type="submit">Update</button>
+                </form>
+            </td>
+            <td th:text="'$' + ${item[2]}"></td>
+            <td th:text="'$' + ${item[2].multiply(item[0])}"></td>
+            <td><a th:href="@{/order/delete-item/{id}(id=${order.orderId}, clothId=${item[4]})}" class="delete-btn">X</a></td>
+        </tr>
+        </tbody>
+    </table>
+    <h2><strong>Total Amount:</strong> <span th:text="'$' + ${totalAmount}"></span></h2> <br/><br/>
+
+    <a th:href="@{/orders}" class="back-to-orders-btn">Go Back to Orders</a>
+</div>
+
+<script>
+    function increment(button) {
+        var input = button.previousElementSibling;
+        input.value = parseInt(input.value) + 1;
+    }
+    function decrement(button) {
+        var input = button.nextElementSibling;
+        if (parseInt(input.value) > 0) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+</script>
+</body>
+</html>

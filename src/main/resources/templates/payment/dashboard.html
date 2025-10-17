@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Dashboard - FreshFold</title>
+    <link rel="stylesheet" th:href="@{/css/payment.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <style>
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .order-summary-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .payment-methods {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .payment-option {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .payment-option:hover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+            transform: translateY(-2px);
+        }
+        .payment-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .amount-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">FreshFold</h1>
+            <div class="nav-links">
+                <a th:href="@{/customer-dashboard}">Dashboard</a>
+                <a th:href="@{/order/browse}">Browse Clothes</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="payment-container">
+        <h1>💳 Payment Dashboard</h1>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Order Summary -->
+        <div class="order-summary-card">
+            <h2>Order Summary</h2>
+            <div th:if="${order}">
+                <div class="order-details">
+                    <p><strong>Service Type:</strong> <span th:text="${order.serviceType}">Standard Washing</span></p>
+                    <p><strong>Clothes:</strong> <span th:text="${order.clothType}">Mixed Items</span></p>
+                    <p><strong>Pickup Date:</strong> <span th:text="${#temporals.format(order.pickupDatetime, 'dd/MM/yyyy HH:mm')}">Date</span></p>
+                    <p><strong>Delivery Date:</strong> <span th:text="${#temporals.format(order.deliveryDatetime, 'dd/MM/yyyy HH:mm')}">Date</span></p>
+                    <p th:if="${order.specialInstructions}" class="special-instructions">
+                        <strong>Special Instructions:</strong> <span th:text="${order.specialInstructions}">None</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="amount-display">
+                Total Amount: <span th:text="'Rs ' + ${amount}">Rs 0.00</span>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="payment-methods-section">
+            <h2>Choose Payment Method</h2>
+
+            <div class="payment-methods">
+                <!-- Card Payment -->
+                <a th:href="@{/payment/card(amount=${order.price})}" class="payment-option">
+                    <div class="payment-icon">💳</div>
+                    <h3>Pay with Card</h3>
+                    <p>Credit/Debit Card Payment</p>
+                    <small>Secure online payment</small>
+                </a>
+
+                <!-- Cash on Delivery -->
+                <form th:action="@{/payment/process}" method="post" style="margin: 0;">
+                    <input type="hidden" name="paymentMethod" value="cash">
+                    <button type="submit" class="payment-option" style="border: none; width: 100%; background: none;">
+                        <div class="payment-icon">💵</div>
+                        <h3>Cash on Delivery</h3>
+                        <p>Pay when we deliver</p>
+                        <small>Cash payment on delivery</small>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="form-actions" style="margin-top: 30px; text-align: center;">
+            <a th:href="@{/order/form}" class="btn btn-secondary">Back to Order Form</a>
+        </div>
+    </div>
+
+    <script>
+        // Auto-hide alerts
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

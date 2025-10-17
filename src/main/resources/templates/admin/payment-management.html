@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Payment Management - FreshFold Laundry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-info span {
+            margin-right: 15px;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        .container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #34495e;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid #2c3e50;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #2c3e50;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        .page-title {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .filter-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .filter-container select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 200px;
+        }
+        .filter-container button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        .filter-container button:hover {
+            background-color: #2980b9;
+        }
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .payment-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+        .card-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .payment-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .payment-date {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 3px;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+        .status-pending { background-color: #f39c12; }
+        .status-processing { background-color: #3498db; }
+        .status-completed { background-color: #27ae60; }
+        .status-failed { background-color: #e74c3c; }
+        .status-cancelled { background-color: #95a5a6; }
+        .card-body {
+            padding: 15px;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-label {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        .detail-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .card-footer {
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .order-info {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-size: 18px;
+            grid-column: span 4;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>FreshFold-Laundry</h1>
+    <div class="user-info">
+        <span id="welcomeMessage">Welcome, Admin</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <a href="/admin/admin/AdminDashboard"  class="active">Dashboard</a>
+        <a href="/admins">Admin Management</a>
+        <a href="/user-management">User Management</a>
+        <a href="/order-management">order Management</a>
+        <a href="/payment-management">Payment Management </a>
+        <a href="category-management">Category Management</a>
+        <a href="/feedback-management">Feedback Management </a>
+    </div>
+
+
+    <div class="content">
+        <h2 class="page-title">Payment Management</h2>
+
+        <div class="filter-container">
+            <form th:action="@{/payment-management/filter}" method="get">
+                <select name="status">
+                    <option value="">All Statuses</option>
+                    <option value="Pending" th:selected="${selectedStatus == 'Pending'}">Pending</option>
+                    <option value="Processing" th:selected="${selectedStatus == 'Processing'}">Processing</option>
+                    <option value="Completed" th:selected="${selectedStatus == 'Completed'}">Completed</option>
+                    <option value="Failed" th:selected="${selectedStatus == 'Failed'}">Failed</option>
+                    <option value="Cancelled" th:selected="${selectedStatus == 'Cancelled'}">Cancelled</option>
+                </select>
+
+                <button type="submit">Filter</button>
+            </form>
+        </div>
+
+        <div class="payment-grid">
+            <div class="payment-card" th:each="payment : ${paymentList}">
+                <div class="card-header">
+                    <div>
+                        <div class="payment-id" th:text="'Payment #' + ${payment.paymentId}"></div>
+                        <div class="payment-date" th:text="${#temporals.format(payment.paymentDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
+                    <span class="status-badge"
+                          th:classappend="'status-' + ${#strings.toLowerCase(payment.status)}"
+                          th:text="${payment.status}"></span>
+                </div>
+
+                <div class="card-body">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Customer</span>
+                            <span class="detail-value" th:text="${payment.customerName}"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Amount</span>
+                            <span class="detail-value" th:text="'$' + ${payment.amount}"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Payment Method</span>
+                            <span class="detail-value" th:text="${payment.paymentMethod}"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Transaction ID</span>
+                            <span class="detail-value" th:text="${payment.transactionId != null ? payment.transactionId : 'N/A'}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="order-info" th:text="'Order #' + ${payment.orderId}"></div>
+                </div>
+            </div>
+
+            <div class="no-results" th:if="${#lists.isEmpty(paymentList)}">
+                No payments found matching your criteria.
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

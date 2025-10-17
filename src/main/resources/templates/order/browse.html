@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Browse Clothes - FreshFold</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo">FreshFold</h1>
+            <div class="nav-links">
+                <a th:href="@{/customer-dashboard}">Dashboard</a>
+                <a th:href="@{/order/browse}" class="active">Browse Clothes</a>
+                <a th:href="@{/order/cart}">🧺 Basket</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Category Menu -->
+        <div class="category-menu">
+            <h2>Select Category</h2>
+            <div class="category-grid">
+                <a th:each="category : ${categories}"
+                   th:href="@{/order/browse(categoryId=${category.categoryId})}"
+                   th:class="${selectedCategoryId == category.categoryId ? 'category-item active' : 'category-item'}"
+                   th:text="${category.name}">Category</a>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Clothes Grid -->
+        <div th:if="${clothes}" class="clothes-section">
+            <h1>Clothes in Selected Category</h1>
+            <div class="clothes-grid">
+                <div th:each="cloth : ${clothes}" class="cloth-item">
+                    <img th:src="@{${cloth.imagePath}}" alt="Cloth Image" class="cloth-image" />
+                    <div class="cloth-info">
+                        <h3 th:text="${cloth.name}">Cloth Name</h3>
+                        <p class="cloth-price" th:text="'Rs ' + ${cloth.unitPrice}">Rs 0.00</p>
+
+                        <form th:action="@{/order/browse/add}" method="post" class="add-to-cart-form">
+                            <input type="hidden" th:name="clothId" th:value="${cloth.clothId}" />
+                            <input type="hidden" th:name="categoryId" th:value="${selectedCategoryId}" />
+
+                            <div class="quantity-controls">
+                                <button type="button" class="qty-btn" onclick="decrement(this)">-</button>
+                                <input type="number" name="quantity"
+                                       th:value="${cartQuantities[cloth.clothId] != null ? cartQuantities[cloth.clothId] : 0}"
+                                       min="0" readonly class="qty-input" />
+                                <button type="button" class="qty-btn" onclick="increment(this)">+</button>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Update Cart</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:unless="${clothes}" class="empty-state">
+            <div class="empty-icon">👕</div>
+            <h2>Select a Category</h2>
+            <p>Choose a category above to browse our laundry services</p>
+        </div>
+
+        <!-- Floating Cart Button -->
+        <a th:href="@{/order/cart}" class="floating-cart-btn">
+            🧺 View Basket
+            <span th:if="${cartQuantities != null and !cartQuantities.isEmpty()}" class="cart-count"
+                  th:text="${#maps.size(cartQuantities)}">0</span>
+        </a>
+    </div>
+
+    <script>
+        function increment(button) {
+            var input = button.previousElementSibling;
+            input.value = parseInt(input.value) + 1;
+        }
+
+        function decrement(button) {
+            var input = button.nextElementSibling;
+            if (parseInt(input.value) > 0) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+
+        // Auto-hide alerts after 3 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>
