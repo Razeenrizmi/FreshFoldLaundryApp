@@ -18,7 +18,7 @@ public class OrderManagementDAO {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT o.order_id, CONCAT(u.first_name, ' ', u.last_name) as customer_name, u.email as customer_email, ");
         sql.append("o.order_time, o.status, ");
-        sql.append("pd.name as pickup_driver_name, dd.name as delivery_driver_name, o.specialInstructions, ");
+        sql.append("pd.name as pickup_driver_name, dd.name as delivery_driver_name, o.special_instructions, ");
         sql.append("p.amount as total_amount ");
         sql.append("FROM Orders o ");
         sql.append("JOIN user u ON o.customer_id = u.id ");
@@ -51,7 +51,7 @@ public class OrderManagementDAO {
                 String pickupDriverName = rs.getString("pickup_driver_name");
                 dto.setDriverName(deliveryDriverName != null ? deliveryDriverName : pickupDriverName);
 
-                dto.setOrderNotes(rs.getString("specialInstructions"));
+                dto.setOrderNotes(rs.getString("special_instructions"));
                 orderList.add(dto);
             }
         } catch (Exception e) {
