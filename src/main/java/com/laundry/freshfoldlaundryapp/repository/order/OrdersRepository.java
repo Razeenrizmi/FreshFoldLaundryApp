@@ -103,6 +103,25 @@ public class OrdersRepository {
         return jdbcTemplate.query(sql, new OrderWithCustomerRowMapper(), status);
     }
 
+    public List<Orders> findByStaffId(Long staffId) {
+        // Defensive: if no staff id provided, return empty list
+        if (staffId == null) {
+            return java.util.Collections.emptyList();
+        }
+
+        String sql = "SELECT o.*, u.first_name, u.last_name, u.phone_number, u.address, " +
+                "CONCAT(u.first_name, ' ', u.last_name) as customer_name, " +
+                "u.phone_number as customer_phone, u.address as customer_address, " +
+                "COALESCE(o.pickup_driver_id, 0) as pickup_driver_id, " +
+                "COALESCE(o.delivery_driver_id, 0) as delivery_driver_id, " +
+                "COALESCE(o.staff_id, 0) as staff_id " +
+                "FROM Orders o JOIN user u ON o.customer_id = u.id " +
+                "WHERE o.staff_id = ? " +
+                "ORDER BY o.order_time DESC";
+
+        return jdbcTemplate.query(sql, new OrderWithCustomerAndStaffRowMapper(), staffId);
+    }
+
     private static class OrderRowMapper implements RowMapper<Orders> {
         @Override
         public Orders mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -296,6 +315,64 @@ public class OrdersRepository {
         }
     }
 
+    // Row mapper for orders with customer and staff information (used in staff dashboard)
+    private static class OrderWithCustomerAndStaffRowMapper implements RowMapper<Orders> {
+        @Override
+        public Orders mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Orders order = new Orders();
+            order.setOrderId(rs.getInt("order_id"));
+            order.setCustomerId(rs.getInt("customer_id"));
+            order.setServiceType(rs.getString("service_type"));
+            order.setPickupDatetime(rs.getTimestamp("pickup_datetime").toLocalDateTime());
+            order.setDeliveryDatetime(rs.getTimestamp("delivery_datetime").toLocalDateTime());
+            order.setOrderTime(rs.getTimestamp("order_time").toLocalDateTime());
+            order.setStatus(rs.getString("status"));
+
+            // Set customer information from joined user table
+            order.setCustomerName(rs.getString("customer_name"));
+            order.setCustomerPhone(rs.getString("customer_phone"));
+            order.setCustomerAddress(rs.getString("customer_address"));
+
+            // Set driver IDs from COALESCE query
+            order.setPickupDriverId(rs.getInt("pickup_driver_id"));
+            order.setDeliveryDriverId(rs.getInt("delivery_driver_id"));
+
+            // Set staff_id
+            try {
+                long staffId = rs.getLong("staff_id");
+                order.setStaffId(staffId == 0 ? null : staffId);
+            } catch (SQLException e) {
+                order.setStaffId(null);
+            }
+
+            // Set additional fields for dashboard display
+            try {
+                order.setPrice(rs.getDouble("price"));
+            } catch (SQLException e) {
+                order.setPrice(0.0); // Default if column doesn't exist
+            }
+
+            try {
+                order.setClothType(rs.getString("cloth_type"));
+            } catch (SQLException e) {
+                order.setClothType("Mixed Items"); // Default if column doesn't exist
+            }
+
+            try {
+                order.setSpecialInstructions(rs.getString("special_instructions"));
+            } catch (SQLException e) {
+                order.setSpecialInstructions(null); // Default if column doesn't exist
+            }
+
+            // Set dashboard date fields
+            order.setOrderDate(order.getOrderTime());
+            order.setPickupDate(order.getPickupDatetime() != null ? order.getPickupDatetime().toLocalDate() : null);
+            order.setDeliveryDate(order.getDeliveryDatetime() != null ? order.getDeliveryDatetime().toLocalDate() : null);
+
+            return order;
+        }
+    }
+
     public void update(Orders order) {
         String sql = "UPDATE Orders SET service_type = ?, pickup_datetime = ?, delivery_datetime = ? WHERE order_id = ?";
         jdbcTemplate.update(sql, order.getServiceType(), Timestamp.valueOf(order.getPickupDatetime()), Timestamp.valueOf(order.getDeliveryDatetime()), order.getOrderId());
@@ -352,6 +429,18 @@ public class OrdersRepository {
             return result > 0;
         } catch (Exception e) {
             System.err.println("Error updating order status: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Staff assignment methods
+    public boolean assignStaff(Integer orderId, Long staffId) {
+        try {
+            String sql = "UPDATE Orders SET staff_id = ? WHERE order_id = ?";
+            int result = jdbcTemplate.update(sql, staffId, orderId);
+            return result > 0;
+        } catch (Exception e) {
+            System.err.println("Error assigning staff: " + e.getMessage());
             return false;
         }
     }

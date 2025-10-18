@@ -19,6 +19,7 @@ public class Orders {
     private String clothType;
     private String specialInstructions;
     private Double price;
+    private int quantity;
 
     // Customer fields for coordinator template compatibility
     private String customerName;
@@ -36,6 +37,17 @@ public class Orders {
 
     // For form handling, not persisted directly
     private List<String> specialRequests;
+
+    private Long staffId;
+    private LocalDateTime assignedDate;
+
+    public Long getStaffId() {
+        return staffId;
+    }
+
+    public LocalDateTime getAssignedDate() {
+        return assignedDate;
+    }
 
     // Getters and Setters
     public Integer getOrderId() { return orderId; }
@@ -151,5 +163,21 @@ public class Orders {
 
     public void setCustomerAddress(String customerAddress) {
         this.customerAddress = customerAddress;
+    }
+
+    public void setStaffId(Long staffId) {
+        this.staffId = staffId;
+    }
+
+    public void setAssignedDate(LocalDateTime assignedDate) {
+        this.assignedDate = assignedDate;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }

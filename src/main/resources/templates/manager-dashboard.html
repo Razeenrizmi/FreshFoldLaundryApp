@@ -33,15 +33,17 @@
         <div class="dashboard-header">
             <h1>Manager Dashboard</h1>
             <div class="stats-cards">
+                <!--
                 <div class="stat-card">
                     <div class="stat-icon pending">
                         <i class="fas fa-clock"></i>
                     </div>
+
                     <div class="stat-info">
                         <h3 th:text="${#lists.size(pendingPayments)}">0</h3>
                         <p>Pending Payments</p>
                     </div>
-                </div>
+                </div> -->
                 <div class="stat-card">
                     <div class="stat-icon orders">
                         <i class="fas fa-tasks"></i>
@@ -52,6 +54,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
+                    <!--
                     <div class="stat-icon delivery">
                         <i class="fas fa-truck"></i>
                     </div>
@@ -60,6 +63,7 @@
                         <p>Ready for Delivery</p>
                     </div>
                 </div>
+                -->
                 <div class="stat-card">
                     <div class="stat-icon staff">
                         <i class="fas fa-users"></i>
@@ -72,7 +76,7 @@
             </div>
         </div>
 
-        <!-- Pending Payments Section -->
+        <!-- Pending Payments Section
         <div class="section-card">
             <div class="section-header">
                 <h2><i class="fas fa-credit-card"></i> Payment Verification</h2>
@@ -129,6 +133,7 @@
                 </div>
             </div>
         </div>
+        -->
 
         <!-- Staff Assignment Section -->
         <div class="section-card">
@@ -186,7 +191,7 @@
             </div>
         </div>
 
-        <!-- Delivery Assignment Section -->
+        <!-- Delivery Assignment Section
         <div class="section-card">
             <div class="section-header">
                 <h2><i class="fas fa-shipping-fast"></i> Delivery Assignment</h2>
@@ -218,7 +223,8 @@
                             <td>
                                 <select class="staff-select enhanced-dropdown" th:id="'delivery-' + ${order.orderId}">
                                     <option value="">Select Delivery Staff</option>
-                                    <!-- Delivery Assignment Dropdown (use deliveryStaffList) -->
+                                    -->
+                                    <!-- Delivery Assignment Dropdown (use deliveryStaffList)
                                     <option th:each="deliveryStaff : ${deliveryStaffList}"
                                             th:value="${deliveryStaff.id}"
                                             th:text="${deliveryStaff.firstName + ' ' + deliveryStaff.lastName}"></option>
@@ -238,6 +244,7 @@
                 </div>
             </div>
         </div>
+        -->
 
         <!-- Manager Chat Section -->
         <div class="chat-section" style="margin-top:40px;max-width:500px;">

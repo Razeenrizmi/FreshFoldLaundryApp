@@ -1,6 +1,6 @@
 package com.laundry.freshfoldlaundryapp.controller;
 
-import com.laundry.freshfoldlaundryapp.model.Order;
+import com.laundry.freshfoldlaundryapp.model.order.Orders;
 import com.laundry.freshfoldlaundryapp.service.StaffService;
 import com.laundry.freshfoldlaundryapp.service.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-//import java.util.ArrayList;
-//import java.util.ArrayList;
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,12 +26,12 @@ public class StaffController {
     @GetMapping("/staff-dashboard")
     public String showStaffDashboard(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long staffId = userDetails.getUserId();
-        List<Order> tasks = staffService.getAllOrdersForStaff();
-        List<Order> assignedTasks = staffService.getAssignedTasksForStaff(staffId);
-        List<Order> inProgressTasks = staffService.getOrdersByStatus("IN_PROGRESS");
-        List<Order> completedTasks = staffService.getOrdersByStatus("COMPLETED");
+        List<Orders> tasks = staffService.getAllOrdersForStaff();
+        List<Orders> assignedTasks = staffService.getAssignedTasksForStaff(staffId);
+        List<Orders> inProgressTasks = staffService.getOrdersByStatus("IN_PROGRESS");
+        List<Orders> completedTasks = staffService.getOrdersByStatus("COMPLETED");
         java.time.LocalDate today = java.time.LocalDate.now();
-        for (Order order : tasks) {
+        for (Orders order : tasks) {
             if ("ASSIGNED".equalsIgnoreCase(order.getStatus()) || "CONFIRMED".equalsIgnoreCase(order.getStatus())) {
                 assignedTasks.add(order);
             } else if ("IN_PROGRESS".equalsIgnoreCase(order.getStatus())) {
@@ -45,6 +42,7 @@ public class StaffController {
                 }
             }
         }
+
         model.addAttribute("tasks", tasks);
         model.addAttribute("assignedTasks", assignedTasks);
         model.addAttribute("inProgressTasks", inProgressTasks);

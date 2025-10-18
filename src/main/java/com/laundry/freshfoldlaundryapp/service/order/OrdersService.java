@@ -281,6 +281,11 @@ public class OrdersService {
         return orderRepository.assignDeliveryDriver(orderId, driverId);
     }
 
+    // Staff assignment method for manager dashboard
+    public boolean assignStaffToOrder(Integer orderId, Long staffId) {
+        return orderRepository.assignStaff(orderId, staffId);
+    }
+
     public boolean updateOrderStatus(Integer orderId, String status) {
         return orderRepository.updateOrderStatus(orderId, status);
     }
