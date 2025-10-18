@@ -20,9 +20,9 @@ public class OrdersRepository {
 
     public Integer save(Orders order) {
         try {
-            // Try with special_instructions first
-            final String sql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status, special_instructions) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            // Try with special_instructions and price first
+            final String sql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status, special_instructions, price) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -33,15 +33,16 @@ public class OrdersRepository {
                 ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Set current time
                 ps.setString(6, "Pending"); // Initial status
                 ps.setString(7, order.getSpecialInstructions()); // Add special_instructions
+                ps.setDouble(8, order.getPrice() != null ? order.getPrice() : 0.0); // Add price
                 return ps;
             }, keyHolder);
             return keyHolder.getKey().intValue();
         } catch (Exception e) {
-            // If special_instructions column doesn't exist, fallback without it
+            // If special_instructions column doesn't exist, fallback without it but with price
             System.out.println("Special instructions column not found, saving without it: " + e.getMessage());
             try {
-                final String fallbackSql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status) " +
-                        "VALUES (?, ?, ?, ?, ?, ?)";
+                final String fallbackSql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status, price) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 jdbcTemplate.update(connection -> {
                     PreparedStatement ps = connection.prepareStatement(fallbackSql, Statement.RETURN_GENERATED_KEYS);
@@ -51,14 +52,36 @@ public class OrdersRepository {
                     ps.setTimestamp(4, Timestamp.valueOf(order.getDeliveryDatetime()));
                     ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Set current time
                     ps.setString(6, "Pending"); // Initial status
+                    ps.setDouble(7, order.getPrice() != null ? order.getPrice() : 0.0); // Add price
                     return ps;
                 }, keyHolder);
 
-                System.out.println("✓ Order saved successfully without special_instructions column");
+                System.out.println("✓ Order saved successfully without special_instructions column but with price");
                 return keyHolder.getKey().intValue();
             } catch (Exception e2) {
-                System.err.println("Both attempts failed: " + e2.getMessage());
-                throw new RuntimeException("Failed to save order: " + e2.getMessage(), e2);
+                // Final fallback without price if price column doesn't exist
+                System.out.println("Price column also not found, saving with minimal columns: " + e2.getMessage());
+                try {
+                    final String minimalSql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status) " +
+                            "VALUES (?, ?, ?, ?, ?, ?)";
+                    KeyHolder keyHolder = new GeneratedKeyHolder();
+                    jdbcTemplate.update(connection -> {
+                        PreparedStatement ps = connection.prepareStatement(minimalSql, Statement.RETURN_GENERATED_KEYS);
+                        ps.setInt(1, order.getCustomerId());
+                        ps.setString(2, order.getServiceType());
+                        ps.setTimestamp(3, Timestamp.valueOf(order.getPickupDatetime()));
+                        ps.setTimestamp(4, Timestamp.valueOf(order.getDeliveryDatetime()));
+                        ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Set current time
+                        ps.setString(6, "Pending"); // Initial status
+                        return ps;
+                    }, keyHolder);
+
+                    System.out.println("✓ Order saved successfully with minimal columns (no price)");
+                    return keyHolder.getKey().intValue();
+                } catch (Exception e3) {
+                    System.err.println("All attempts failed: " + e3.getMessage());
+                    throw new RuntimeException("Failed to save order: " + e3.getMessage(), e3);
+                }
             }
         }
     }

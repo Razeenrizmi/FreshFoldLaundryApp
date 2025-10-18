@@ -2,9 +2,11 @@ package com.laundry.freshfoldlaundryapp.controller;
 
 import com.laundry.freshfoldlaundryapp.model.Order;
 import com.laundry.freshfoldlaundryapp.model.order.Orders;
+import com.laundry.freshfoldlaundryapp.model.order.Customer;
 import com.laundry.freshfoldlaundryapp.service.CustomerService;
 import com.laundry.freshfoldlaundryapp.service.CustomUserDetails;
 import com.laundry.freshfoldlaundryapp.service.order.OrdersService;
+import com.laundry.freshfoldlaundryapp.repository.order.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -23,16 +25,17 @@ public class CustomerController {
     @Autowired
     private OrdersService ordersService;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
 
     private LocalDate today;
 
     @GetMapping("/customer-dashboard")
     public String showCustomerDashboard(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
-            // Get current customer ID from authenticated user
-            Long customerId = userDetails != null ? userDetails.getUserId() : null;
-
-            if (customerId == null) {
+            // Get authenticated user details
+            if (userDetails == null || userDetails.getUsername() == null) {
                 model.addAttribute("orders", java.util.Collections.emptyList());
                 model.addAttribute("inProgressOrders", java.util.Collections.emptyList());
                 model.addAttribute("pendingOrders", java.util.Collections.emptyList());
@@ -42,13 +45,30 @@ public class CustomerController {
                 return "customer-dashboard";
             }
 
-            // Fetch orders for this specific customer from Orders table using customer-specific methods
-            System.out.println("Fetching orders for customer ID: " + customerId + " from Orders table...");
+            // Get the correct customer ID from Customer table (not the user ID from authentication)
+            Integer actualCustomerId = getCustomerIdFromUserDetails(userDetails);
 
-            List<Orders> orders = ordersService.getOrdersByCustomerId(customerId.intValue());
-            List<Orders> pendingOrders = ordersService.getPendingOrdersByCustomer(customerId.intValue());
-            List<Orders> inProgressOrders = ordersService.getInProgressOrdersByCustomer(customerId.intValue());
-            List<Orders> completedOrders = ordersService.getCompletedOrdersByCustomer(customerId.intValue());
+            System.out.println("DEBUG: Authenticated User ID: " + userDetails.getUserId());
+            System.out.println("DEBUG: Authenticated Username: " + userDetails.getUsername());
+            System.out.println("DEBUG: Mapped Customer ID: " + actualCustomerId);
+
+            if (actualCustomerId == null) {
+                model.addAttribute("orders", java.util.Collections.emptyList());
+                model.addAttribute("inProgressOrders", java.util.Collections.emptyList());
+                model.addAttribute("pendingOrders", java.util.Collections.emptyList());
+                model.addAttribute("completedOrders", java.util.Collections.emptyList());
+                model.addAttribute("customerId", 0L);
+                model.addAttribute("errorMessage", "Customer record not found");
+                return "customer-dashboard";
+            }
+
+            // Fetch orders using the CORRECT customer ID from Customer table
+            System.out.println("Fetching orders for customer ID: " + actualCustomerId + " from Orders table...");
+
+            List<Orders> orders = ordersService.getOrdersByCustomerId(actualCustomerId);
+            List<Orders> pendingOrders = ordersService.getPendingOrdersByCustomer(actualCustomerId);
+            List<Orders> inProgressOrders = ordersService.getInProgressOrdersByCustomer(actualCustomerId);
+            List<Orders> completedOrders = ordersService.getCompletedOrdersByCustomer(actualCustomerId);
 
             System.out.println("Customer orders fetched: " + (orders != null ? orders.size() : "null"));
             System.out.println("Customer pending orders fetched: " + (pendingOrders != null ? pendingOrders.size() : "null"));
@@ -60,7 +80,7 @@ public class CustomerController {
             model.addAttribute("inProgressOrders", inProgressOrders != null ? inProgressOrders.stream().filter(java.util.Objects::nonNull).toList() : java.util.Collections.emptyList());
             model.addAttribute("pendingOrders", pendingOrders != null ? pendingOrders.stream().filter(java.util.Objects::nonNull).toList() : java.util.Collections.emptyList());
             model.addAttribute("completedOrders", completedOrders != null ? completedOrders.stream().filter(java.util.Objects::nonNull).toList() : java.util.Collections.emptyList());
-            model.addAttribute("customerId", customerId);
+            model.addAttribute("customerId", actualCustomerId.longValue());
 
             System.out.println("Successfully prepared model for customer dashboard from Orders table");
             return "customer-dashboard";
@@ -78,6 +98,32 @@ public class CustomerController {
             model.addAttribute("errorMessage", "Unable to load orders at this time. Please try again later.");
 
             return "customer-dashboard";
+        }
+    }
+
+    /**
+     * Gets the correct customer ID from the Customer table based on the authenticated user's email.
+     * This maps from the authentication user ID to the actual customer ID used for orders.
+     */
+    private Integer getCustomerIdFromUserDetails(CustomUserDetails userDetails) {
+        try {
+            if (userDetails == null || userDetails.getUsername() == null) {
+                return null;
+            }
+
+            // Find the Customer record by email (username is email in your system)
+            Customer existingCustomer = customerRepository.findByEmail(userDetails.getUsername());
+
+            if (existingCustomer != null) {
+                return existingCustomer.getCustomerId();
+            }
+
+            // If no customer record exists, this means the user hasn't placed any orders yet
+            return null;
+
+        } catch (Exception e) {
+            System.err.println("Error getting customer ID from user details: " + e.getMessage());
+            return null;
         }
     }
 
