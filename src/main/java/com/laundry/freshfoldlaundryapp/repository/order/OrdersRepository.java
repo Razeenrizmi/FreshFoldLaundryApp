@@ -19,20 +19,48 @@ public class OrdersRepository {
     private JdbcTemplate jdbcTemplate;
 
     public Integer save(Orders order) {
-        final String sql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, order.getCustomerId());
-            ps.setString(2, order.getServiceType());
-            ps.setTimestamp(3, Timestamp.valueOf(order.getPickupDatetime()));
-            ps.setTimestamp(4, Timestamp.valueOf(order.getDeliveryDatetime()));
-            ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Set current time
-            ps.setString(6, "Pending"); // Initial status
-            return ps;
-        }, keyHolder);
-        return keyHolder.getKey().intValue();
+        try {
+            // Try with special_instructions first
+            final String sql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status, special_instructions) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setInt(1, order.getCustomerId());
+                ps.setString(2, order.getServiceType());
+                ps.setTimestamp(3, Timestamp.valueOf(order.getPickupDatetime()));
+                ps.setTimestamp(4, Timestamp.valueOf(order.getDeliveryDatetime()));
+                ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Set current time
+                ps.setString(6, "Pending"); // Initial status
+                ps.setString(7, order.getSpecialInstructions()); // Add special_instructions
+                return ps;
+            }, keyHolder);
+            return keyHolder.getKey().intValue();
+        } catch (Exception e) {
+            // If special_instructions column doesn't exist, fallback without it
+            System.out.println("Special instructions column not found, saving without it: " + e.getMessage());
+            try {
+                final String fallbackSql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)";
+                KeyHolder keyHolder = new GeneratedKeyHolder();
+                jdbcTemplate.update(connection -> {
+                    PreparedStatement ps = connection.prepareStatement(fallbackSql, Statement.RETURN_GENERATED_KEYS);
+                    ps.setInt(1, order.getCustomerId());
+                    ps.setString(2, order.getServiceType());
+                    ps.setTimestamp(3, Timestamp.valueOf(order.getPickupDatetime()));
+                    ps.setTimestamp(4, Timestamp.valueOf(order.getDeliveryDatetime()));
+                    ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Set current time
+                    ps.setString(6, "Pending"); // Initial status
+                    return ps;
+                }, keyHolder);
+
+                System.out.println("✓ Order saved successfully without special_instructions column");
+                return keyHolder.getKey().intValue();
+            } catch (Exception e2) {
+                System.err.println("Both attempts failed: " + e2.getMessage());
+                throw new RuntimeException("Failed to save order: " + e2.getMessage(), e2);
+            }
+        }
     }
 
     public Orders findById(Integer orderId) {

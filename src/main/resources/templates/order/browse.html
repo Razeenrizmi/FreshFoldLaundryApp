@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Clothes - FreshFold</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
 <body>
+    <!-- ============================================
+         NAVIGATION BAR
+         ============================================ -->
     <nav class="navbar">
         <div class="nav-container">
             <h1 class="nav-logo">FreshFold</h1>
@@ -17,80 +24,129 @@
         </div>
     </nav>
 
+    <!-- ============================================
+         MAIN CONTENT
+         ============================================ -->
     <div class="container">
-        <!-- Category Menu -->
+
+        <!-- ========== Category Selection Menu ========== -->
         <div class="category-menu">
             <h2>Select Category</h2>
             <div class="category-grid">
                 <a th:each="category : ${categories}"
                    th:href="@{/order/browse(categoryId=${category.categoryId})}"
                    th:class="${selectedCategoryId == category.categoryId ? 'category-item active' : 'category-item'}"
-                   th:text="${category.name}">Category</a>
+                   th:text="${category.name}">
+                    Category
+                </a>
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
+        <!-- ========== Alert Messages ========== -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
         <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-        <!-- Clothes Grid -->
+        <!-- ========== Clothes Display Section ========== -->
         <div th:if="${clothes}" class="clothes-section">
             <h1>Clothes in Selected Category</h1>
+
             <div class="clothes-grid">
+                <!-- Individual Cloth Item -->
                 <div th:each="cloth : ${clothes}" class="cloth-item">
-                    <img th:src="@{${cloth.imagePath}}" alt="Cloth Image" class="cloth-image" />
+
+                    <!-- Cloth Image -->
+                    <img th:src="@{${cloth.imagePath}}"
+                         th:alt="${cloth.name}"
+                         class="cloth-image" />
+
+                    <!-- Cloth Information & Cart Form -->
                     <div class="cloth-info">
                         <h3 th:text="${cloth.name}">Cloth Name</h3>
                         <p class="cloth-price" th:text="'Rs ' + ${cloth.unitPrice}">Rs 0.00</p>
 
-                        <form th:action="@{/order/browse/add}" method="post" class="add-to-cart-form">
-                            <input type="hidden" th:name="clothId" th:value="${cloth.clothId}" />
-                            <input type="hidden" th:name="categoryId" th:value="${selectedCategoryId}" />
+                        <!-- Add to Cart Form -->
+                        <form th:action="@{/order/browse/add}"
+                              method="post"
+                              class="add-to-cart-form">
 
+                            <!-- Hidden Fields -->
+                            <input type="hidden" name="clothId" th:value="${cloth.clothId}" />
+                            <input type="hidden" name="categoryId" th:value="${selectedCategoryId}" />
+
+                            <!-- Quantity Controls -->
                             <div class="quantity-controls">
-                                <button type="button" class="qty-btn" onclick="decrement(this)">-</button>
-                                <input type="number" name="quantity"
+                                <button type="button"
+                                        class="qty-btn"
+                                        onclick="decrement(this)">
+                                    -
+                                </button>
+                                <input type="number"
+                                       name="quantity"
                                        th:value="${cartQuantities[cloth.clothId] != null ? cartQuantities[cloth.clothId] : 0}"
-                                       min="0" readonly class="qty-input" />
-                                <button type="button" class="qty-btn" onclick="increment(this)">+</button>
+                                       min="0"
+                                       readonly
+                                       class="qty-input" />
+                                <button type="button"
+                                        class="qty-btn"
+                                        onclick="increment(this)">
+                                    +
+                                </button>
                             </div>
 
-                            <button type="submit" class="btn btn-primary">Update Cart</button>
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary">
+                                Update Cart
+                            </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Empty State -->
+        <!-- ========== Empty State (No Category Selected) ========== -->
         <div th:unless="${clothes}" class="empty-state">
             <div class="empty-icon">👕</div>
             <h2>Select a Category</h2>
             <p>Choose a category above to browse our laundry services</p>
         </div>
 
-        <!-- Floating Cart Button -->
+        <!-- ========== Floating Cart Button ========== -->
         <a th:href="@{/order/cart}" class="floating-cart-btn">
             🧺 View Basket
-            <span th:if="${cartQuantities != null and !cartQuantities.isEmpty()}" class="cart-count"
-                  th:text="${#maps.size(cartQuantities)}">0</span>
+            <span th:if="${cartQuantities != null and !cartQuantities.isEmpty()}"
+                  class="cart-count"
+                  th:text="${#maps.size(cartQuantities)}">
+                0
+            </span>
         </a>
     </div>
 
+    <!-- ============================================
+         JAVASCRIPT
+         ============================================ -->
     <script>
+        /**
+         * Increment quantity input value
+         */
         function increment(button) {
-            var input = button.previousElementSibling;
+            const input = button.previousElementSibling;
             input.value = parseInt(input.value) + 1;
         }
 
+        /**
+         * Decrement quantity input value (minimum 0)
+         */
         function decrement(button) {
-            var input = button.nextElementSibling;
-            if (parseInt(input.value) > 0) {
-                input.value = parseInt(input.value) - 1;
+            const input = button.nextElementSibling;
+            const currentValue = parseInt(input.value);
+            if (currentValue > 0) {
+                input.value = currentValue - 1;
             }
         }
 
-        // Auto-hide alerts after 3 seconds
+        /**
+         * Auto-hide alert messages after 3 seconds
+         */
         setTimeout(function() {
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {

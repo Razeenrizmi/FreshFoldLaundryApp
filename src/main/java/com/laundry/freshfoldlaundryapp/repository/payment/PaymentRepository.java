@@ -21,18 +21,61 @@ public class PaymentRepository {
     }
 
     public int save(Payment payment) {
-        String sql = "INSERT INTO payment (order_id, payment_method, payment_status, amount, payment_datetime, card_holder, card_number, expiry_date, cvv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        return jdbcTemplate.update(sql,
-                payment.getOrderId(),
-                payment.getPaymentMethod(),
-                payment.getPaymentStatus(),
-                payment.getAmount(),
-                Timestamp.valueOf(payment.getPaymentDatetime()),
-                payment.getCardHolder(),
-                payment.getCardNumber(),
-                payment.getExpiryDate(),
-                payment.getCvv()
-        );
+        try {
+            // Use Pid instead of payment_id, and handle date conversion for payment_datetime
+            String sql = "INSERT INTO payment (order_id, payment_method, payment_status, amount, payment_datetime, card_holder, card_number, expiry_date, cvv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            // Log the SQL and parameters for debugging
+            System.out.println("=== PAYMENT INSERT DEBUG ===");
+            System.out.println("SQL: " + sql);
+            System.out.println("Parameters:");
+            System.out.println("  order_id: " + payment.getOrderId());
+            System.out.println("  payment_method: " + payment.getPaymentMethod());
+            System.out.println("  payment_status: " + payment.getPaymentStatus());
+            System.out.println("  amount: " + payment.getAmount());
+            System.out.println("  payment_datetime: " + payment.getPaymentDatetime());
+            System.out.println("  card_holder: " + payment.getCardHolder());
+            System.out.println("  card_number: " + payment.getCardNumber());
+            System.out.println("  expiry_date: " + payment.getExpiryDate());
+            System.out.println("  cvv: " + payment.getCvv());
+
+            // Convert payment_datetime to Date
+            java.sql.Date paymentDate = payment.getPaymentDatetime() != null ?
+                    java.sql.Date.valueOf(payment.getPaymentDatetime().toLocalDate()) :
+                    new java.sql.Date(System.currentTimeMillis());
+
+            System.out.println("  Converted payment_date: " + paymentDate);
+            System.out.println("=========================");
+
+            int result = jdbcTemplate.update(sql,
+                    payment.getOrderId(),
+                    payment.getPaymentMethod(),
+                    payment.getPaymentStatus(),
+                    payment.getAmount(),
+                    paymentDate,
+                    payment.getCardHolder(),
+                    payment.getCardNumber(),
+                    payment.getExpiryDate(),
+                    payment.getCvv()
+            );
+
+            System.out.println("✓ Payment saved successfully! Result: " + result);
+            return result;
+
+        } catch (Exception e) {
+            // Log the full error for debugging with complete stack trace
+            System.err.println("=== PAYMENT INSERT ERROR ===");
+            System.err.println("Error message: " + e.getMessage());
+            System.err.println("Error class: " + e.getClass().getName());
+            if (e.getCause() != null) {
+                System.err.println("Caused by: " + e.getCause().getMessage());
+                System.err.println("Root cause class: " + e.getCause().getClass().getName());
+            }
+            System.err.println("Full stack trace:");
+            e.printStackTrace();
+            System.err.println("=========================");
+            throw new RuntimeException("Failed to save payment: " + e.getMessage(), e);
+        }
     }
 
     public List<Payment> findAll() {
@@ -60,14 +103,19 @@ public class PaymentRepository {
     private RowMapper<Payment> mapRow() {
         return (ResultSet rs, int rowNum) -> {
             Payment p = new Payment();
-            p.setPaymentId(rs.getInt("payment_id"));
+            p.setPaymentId(rs.getInt("Pid")); // Use Pid instead of payment_id
             p.setOrderId(rs.getInt("order_id"));
             p.setPaymentMethod(rs.getString("payment_method"));
             p.setPaymentStatus(rs.getString("payment_status"));
             p.setAmount(rs.getDouble("amount"));
-            p.setPaymentDatetime(rs.getTimestamp("payment_datetime").toLocalDateTime());
 
-            // Handle new card fields (may be null for cash payments)
+            // payment_datetime is DATE type, not TIMESTAMP, so convert it properly
+            java.sql.Date paymentDate = rs.getDate("payment_datetime");
+            if (paymentDate != null) {
+                p.setPaymentDatetime(paymentDate.toLocalDate().atStartOfDay());
+            }
+
+            // Handle card fields (may be null for cash payments)
             p.setCardHolder(rs.getString("card_holder"));
             p.setCardNumber(rs.getString("card_number"));
             p.setExpiryDate(rs.getString("expiry_date"));

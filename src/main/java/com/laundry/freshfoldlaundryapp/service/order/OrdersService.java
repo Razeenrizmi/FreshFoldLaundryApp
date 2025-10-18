@@ -81,6 +81,9 @@ public class OrdersService {
         Integer customerId = customerRepository.save(customer);
         order.setCustomerId(customerId);
 
+        // Set special instructions on the order object
+        order.setSpecialInstructions(specialRequestsStr);
+
         // Save order and get ID
         Integer orderId = orderRepository.save(order);
         order.setOrderId(orderId);
@@ -245,29 +248,49 @@ public class OrdersService {
     // Save payment record
     public void savePayment(Payment payment) {
         try {
+            System.out.println("=== SERVICE: savePayment called ===");
+            System.out.println("Payment details received:");
+            System.out.println("  Order ID: " + payment.getOrderId());
+            System.out.println("  Amount: " + payment.getAmount());
+            System.out.println("  Method: " + payment.getPaymentMethod());
+            System.out.println("  PaymentDatetime: " + payment.getPaymentDatetime());
+            System.out.println("  PaymentTime: " + payment.getPaymentTime());
+            System.out.println("  Status: " + payment.getStatus());
+            System.out.println("  PaymentStatus: " + payment.getPaymentStatus());
+
             // Set payment datetime if not already set
             if (payment.getPaymentDatetime() == null && payment.getPaymentTime() != null) {
                 payment.setPaymentDatetime(payment.getPaymentTime());
+                System.out.println("  Set paymentDatetime from paymentTime: " + payment.getPaymentDatetime());
             } else if (payment.getPaymentDatetime() == null) {
                 payment.setPaymentDatetime(LocalDateTime.now());
+                System.out.println("  Set paymentDatetime to now: " + payment.getPaymentDatetime());
             }
             
             // Set payment status if not already set
             if (payment.getPaymentStatus() == null && payment.getStatus() != null) {
                 payment.setPaymentStatus(payment.getStatus());
+                System.out.println("  Set paymentStatus from status: " + payment.getPaymentStatus());
             }
-            
+
+            System.out.println("Calling paymentRepository.save()...");
+
             // Use the PaymentRepository to save the payment to database
             int result = paymentRepository.save(payment);
             
             if (result > 0) {
-                System.out.println("Payment successfully saved to database: Order ID=" + payment.getOrderId() +
+                System.out.println("✓ Payment successfully saved to database: Order ID=" + payment.getOrderId() +
                         ", Amount=" + payment.getAmount() +
                         ", Method=" + payment.getPaymentMethod());
             } else {
                 throw new RuntimeException("Failed to save payment to database");
             }
         } catch (Exception e) {
+            System.err.println("=== SERVICE: savePayment failed ===");
+            System.err.println("Error: " + e.getMessage());
+            System.err.println("Error class: " + e.getClass().getName());
+            e.printStackTrace();
+            System.err.println("=== End of service error ===");
             throw new RuntimeException("Failed to save payment: " + e.getMessage(), e);
         }
     }
@@ -290,3 +313,4 @@ public class OrdersService {
         return orderRepository.updateOrderStatus(orderId, status);
     }
 }
+

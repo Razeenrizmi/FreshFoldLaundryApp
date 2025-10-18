@@ -163,9 +163,13 @@
 package com.laundry.freshfoldlaundryapp.controller.payment;
 
 import com.laundry.freshfoldlaundryapp.model.order.Orders;
+import com.laundry.freshfoldlaundryapp.model.order.Customer;
 import com.laundry.freshfoldlaundryapp.model.payment.Payment;
 import com.laundry.freshfoldlaundryapp.service.order.OrdersService;
+import com.laundry.freshfoldlaundryapp.service.CustomUserDetails;
+import com.laundry.freshfoldlaundryapp.repository.order.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -181,6 +185,9 @@ public class PaymentController {
 
     @Autowired
     private OrdersService ordersService;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     // Payment Dashboard - shows order summary and payment options
     @GetMapping("/dashboard")
@@ -239,6 +246,7 @@ public class PaymentController {
                                    @RequestParam String expiryDate,
                                    @RequestParam String amount,
                                    HttpSession session,
+                                   @AuthenticationPrincipal CustomUserDetails userDetails,
                                    RedirectAttributes redirectAttributes) {
         try {
             // Basic card validation
@@ -272,7 +280,15 @@ public class PaymentController {
                 return "redirect:/order/browse";
             }
 
-            // Update order details - convert to Double
+            // Create or get Customer record to satisfy foreign key constraint
+            Integer customerId = ensureCustomerExists(userDetails);
+            if (customerId == null) {
+                redirectAttributes.addFlashAttribute("error", "Failed to create customer record. Please try again.");
+                return "redirect:/payment/card?amount=" + amount;
+            }
+
+            // Update order with valid customer_id from Customer table
+            pendingOrder.setCustomerId(customerId);
             pendingOrder.setPrice(Double.parseDouble(amount));
             pendingOrder.setStatus("Confirmed");
             pendingOrder.setOrderTime(LocalDateTime.now());
@@ -282,23 +298,54 @@ public class PaymentController {
             Integer savedOrderId = null;
 
             try {
+                System.out.println("=== CONTROLLER: About to save order ===");
+                System.out.println("Order details:");
+                System.out.println("  Customer ID: " + pendingOrder.getCustomerId());
+                System.out.println("  Service Type: " + pendingOrder.getServiceType());
+                System.out.println("  Pickup Datetime: " + pendingOrder.getPickupDatetime());
+                System.out.println("  Delivery Datetime: " + pendingOrder.getDeliveryDatetime());
+                System.out.println("  Special Instructions: " + pendingOrder.getSpecialInstructions());
+                System.out.println("  Price: " + pendingOrder.getPrice());
+                System.out.println("  Status: " + pendingOrder.getStatus());
+
                 if (orderCart != null) {
+                    System.out.println("Saving order with items (cart size: " + orderCart.size() + ")...");
                     // Try saveOrderWithItems first
                     savedOrder = ordersService.saveOrderWithItems(pendingOrder, orderCart);
+                    System.out.println("✓ Order saved with items. Order ID: " + savedOrder.getOrderId());
                 } else {
+                    System.out.println("Saving order without cart items...");
                     // Try saveOrder method
                     savedOrderId = ordersService.saveOrder(pendingOrder);
                     if (savedOrderId != null) {
                         pendingOrder.setOrderId(savedOrderId);
                         savedOrder = pendingOrder;
+                        System.out.println("✓ Order saved. Order ID: " + savedOrderId);
+                    } else {
+                        System.err.println("✗ Order save returned null!");
                     }
                 }
             } catch (Exception e) {
+                System.err.println("=== ORDER SAVE ERROR ===");
+                System.err.println("Error saving order: " + e.getMessage());
+                System.err.println("Error class: " + e.getClass().getName());
+                e.printStackTrace();
+                System.err.println("=========================");
+
                 // Fallback to simple save
-                savedOrderId = ordersService.saveOrder(pendingOrder);
-                if (savedOrderId != null) {
-                    pendingOrder.setOrderId(savedOrderId);
-                    savedOrder = pendingOrder;
+                try {
+                    System.out.println("Trying fallback order save...");
+                    savedOrderId = ordersService.saveOrder(pendingOrder);
+                    if (savedOrderId != null) {
+                        pendingOrder.setOrderId(savedOrderId);
+                        savedOrder = pendingOrder;
+                        System.out.println("✓ Fallback order save successful. Order ID: " + savedOrderId);
+                    } else {
+                        System.err.println("✗ Fallback order save also returned null!");
+                    }
+                } catch (Exception e2) {
+                    System.err.println("✗ Fallback order save also failed: " + e2.getMessage());
+                    throw e2;
                 }
             }
 
@@ -320,10 +367,21 @@ public class PaymentController {
 
                 // Save payment
                 try {
+                    System.out.println("=== CONTROLLER: About to save payment ===");
+                    System.out.println("Order ID: " + savedOrder.getOrderId());
+                    System.out.println("Amount: " + amount);
+                    System.out.println("Payment Method: Card");
+                    System.out.println("Payment object created, calling ordersService.savePayment()...");
                     ordersService.savePayment(payment);
+                    System.out.println("=== CONTROLLER: Payment saved successfully ===");
                 } catch (Exception e) {
                     // Payment save failed, but order was saved
-                    System.err.println("Payment save failed: " + e.getMessage());
+                    System.err.println("=== CONTROLLER: Payment save failed ===");
+                    System.err.println("Error: " + e.getMessage());
+                    System.err.println("Error class: " + e.getClass().getName());
+                    e.printStackTrace();
+                    System.err.println("=== End of controller error ===");
+                    throw new RuntimeException("Error processing payment: " + e.getMessage(), e);
                 }
 
                 // Clear session data
@@ -350,6 +408,7 @@ public class PaymentController {
     @PostMapping("/process")
     public String processPayment(@RequestParam String paymentMethod,
                                HttpSession session,
+                               @AuthenticationPrincipal CustomUserDetails userDetails,
                                RedirectAttributes redirectAttributes) {
         try {
             Orders pendingOrder = (Orders) session.getAttribute("pendingOrder");
@@ -362,6 +421,15 @@ public class PaymentController {
             }
 
             if ("cash".equals(paymentMethod)) {
+                // Create or get Customer record to satisfy foreign key constraint
+                Integer customerId = ensureCustomerExists(userDetails);
+                if (customerId == null) {
+                    redirectAttributes.addFlashAttribute("error", "Failed to create customer record. Please try again.");
+                    return "redirect:/payment/dashboard";
+                }
+
+                // Update order with valid customer_id from Customer table
+                pendingOrder.setCustomerId(customerId);
                 pendingOrder.setStatus("Pending Payment");
                 pendingOrder.setOrderTime(LocalDateTime.now());
 
@@ -426,6 +494,48 @@ public class PaymentController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error processing payment: " + e.getMessage());
             return "redirect:/payment/dashboard";
+        }
+    }
+
+    /**
+     * Ensures a Customer record exists for the authenticated user.
+     * If the customer doesn't exist, creates a new one.
+     *
+     * @param userDetails The authenticated user details
+     * @return The customer_id from the Customer table, or null if failed
+     */
+    private Integer ensureCustomerExists(CustomUserDetails userDetails) {
+        try {
+            if (userDetails == null || userDetails.getUsername() == null) {
+                return null;
+            }
+
+            // Try to find existing customer by email
+            Customer existingCustomer = customerRepository.findByEmail(userDetails.getUsername());
+
+            if (existingCustomer != null) {
+                return existingCustomer.getCustomerId();
+            }
+
+            // Create new customer record with available data
+            Customer newCustomer = new Customer();
+            newCustomer.setEmail(userDetails.getUsername());
+
+            // Use username as name (will be updated when user provides more info)
+            String username = userDetails.getUsername();
+            String displayName = username.contains("@") ? username.substring(0, username.indexOf("@")) : username;
+            newCustomer.setName(displayName);
+
+            // Set default values for phone and address (user can update later)
+            newCustomer.setPhoneNo("N/A"); // Will be updated on profile completion
+            newCustomer.setAddress("N/A"); // Will be updated on profile completion
+
+            // Save and return the new customer_id
+            return customerRepository.save(newCustomer);
+
+        } catch (Exception e) {
+            System.err.println("Error ensuring customer exists: " + e.getMessage());
+            return null;
         }
     }
 
