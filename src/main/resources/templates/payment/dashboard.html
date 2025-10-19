@@ -84,7 +84,7 @@
             </div>
 
             <div class="amount-display">
-                Total Amount: <span th:text="'Rs ' + ${amount}">Rs 0.00</span>
+                Total Amount: <span th:text="'Rs ' + ${order.price != null ? order.price : (amount != null ? amount : '0.00')}">Rs 0.00</span>
             </div>
         </div>
 
@@ -94,7 +94,7 @@
 
             <div class="payment-methods">
                 <!-- Card Payment -->
-                <a th:href="@{/payment/card(amount=${order.price})}" class="payment-option">
+                <a th:href="@{/payment/card(amount=${order.price != null ? order.price : amount})}" class="payment-option">
                     <div class="payment-icon">💳</div>
                     <h3>Pay with Card</h3>
                     <p>Credit/Debit Card Payment</p>

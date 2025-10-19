@@ -166,6 +166,7 @@ import com.laundry.freshfoldlaundryapp.model.order.Orders;
 import com.laundry.freshfoldlaundryapp.model.order.Customer;
 import com.laundry.freshfoldlaundryapp.model.payment.Payment;
 import com.laundry.freshfoldlaundryapp.service.order.OrdersService;
+import com.laundry.freshfoldlaundryapp.service.order.CartService;
 import com.laundry.freshfoldlaundryapp.service.CustomUserDetails;
 import com.laundry.freshfoldlaundryapp.repository.order.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,6 +190,9 @@ public class PaymentController {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private CartService cartService;
+
     // Payment Dashboard - shows order summary and payment options
     @GetMapping("/dashboard")
     public String showPaymentDashboard(Model model, HttpSession session) {
@@ -200,9 +204,37 @@ public class PaymentController {
             return "redirect:/order/browse";
         }
 
+        // Debug information
+        System.out.println("=== Payment Dashboard Debug ===");
+        System.out.println("Pending Order Price: " + pendingOrder.getPrice());
+        System.out.println("Session Total Amount: " + session.getAttribute("totalAmount"));
+
         // Get order details for display
         model.addAttribute("order", pendingOrder);
-        model.addAttribute("amount", pendingOrder.getPrice());
+
+        // Ensure both amount and order.price are available for template flexibility
+        Double orderPrice = pendingOrder.getPrice();
+        Double sessionAmount = (Double) session.getAttribute("totalAmount");
+
+        // Use the best available amount value
+        Double finalAmount = null;
+        if (orderPrice != null && orderPrice > 0.0) {
+            finalAmount = orderPrice;
+            System.out.println("Using order price: " + finalAmount);
+        } else if (sessionAmount != null && sessionAmount > 0.0) {
+            finalAmount = sessionAmount;
+            // Also update the pending order with this amount
+            pendingOrder.setPrice(finalAmount);
+            session.setAttribute("pendingOrder", pendingOrder);
+            System.out.println("Using session amount and updating order: " + finalAmount);
+        } else {
+            finalAmount = 0.00;
+            System.out.println("No valid amount found, defaulting to 0.00");
+        }
+
+        model.addAttribute("amount", finalAmount);
+        System.out.println("Final amount set to model: " + finalAmount);
+        System.out.println("===============================");
 
         return "payment/dashboard";
     }
@@ -384,10 +416,8 @@ public class PaymentController {
                     throw new RuntimeException("Error processing payment: " + e.getMessage(), e);
                 }
 
-                // Clear session data
-                session.removeAttribute("cart");
-                session.removeAttribute("pendingOrder");
-                session.removeAttribute("orderCart");
+                // Clear session data and database cart for authenticated users
+                clearCartAfterOrder(session, userDetails);
 
                 redirectAttributes.addFlashAttribute("success", "Payment successful! Your order has been placed.");
                 redirectAttributes.addFlashAttribute("orderId", savedOrder.getOrderId());
@@ -474,10 +504,8 @@ public class PaymentController {
                         System.err.println("Payment save failed: " + e.getMessage());
                     }
 
-                    // Clear session data
-                    session.removeAttribute("cart");
-                    session.removeAttribute("pendingOrder");
-                    session.removeAttribute("orderCart");
+                    // Clear session data and database cart for authenticated users
+                    clearCartAfterOrder(session, userDetails);
 
                     redirectAttributes.addFlashAttribute("success", "Order placed successfully! You can pay cash on delivery.");
                     redirectAttributes.addFlashAttribute("orderId", savedOrder.getOrderId());
@@ -546,5 +574,46 @@ public class PaymentController {
             model.addAttribute("orderId", orderId);
         }
         return "payment/success";
+    }
+
+    // Clear cart data from session and database
+    private void clearCartAfterOrder(HttpSession session, CustomUserDetails userDetails) {
+        try {
+            System.out.println("=== CLEARING CART AFTER ORDER ===");
+
+            // Clear session cart data
+            session.removeAttribute("cart");
+            session.removeAttribute("pendingOrder");
+            session.removeAttribute("orderCart");
+            session.removeAttribute("cartItems");
+            session.removeAttribute("totalAmount");
+            session.removeAttribute("customerDetails");
+            System.out.println("✓ Session cart data cleared");
+
+            // If user is authenticated, clear database cart as well
+            if (userDetails != null && userDetails.getUserId() != null) {
+                Long userId = userDetails.getUserId();
+                System.out.println("Clearing database cart for user ID: " + userId);
+
+                try {
+                    boolean cleared = cartService.clearCart(userId);
+                    if (cleared) {
+                        System.out.println("✓ Database cart cleared successfully");
+                    } else {
+                        System.out.println("⚠ Database cart clearing returned false (may have been empty)");
+                    }
+                } catch (Exception e) {
+                    System.err.println("✗ Error clearing database cart: " + e.getMessage());
+                    // Don't throw exception here as order was already processed successfully
+                }
+            } else {
+                System.out.println("User not authenticated, skipping database cart clearing");
+            }
+
+            System.out.println("=== CART CLEARING COMPLETED ===");
+        } catch (Exception e) {
+            System.err.println("Error clearing cart data: " + e.getMessage());
+            // Don't throw exception here as order was already processed successfully
+        }
     }
 }

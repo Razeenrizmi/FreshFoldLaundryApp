@@ -86,7 +86,7 @@
                 <i class="fas fa-clock"></i>
                 <span>View Assigned</span>
             </div>
-            <div class="quick-action" onclick="filterTasks('in-progress')">
+            <div class="quick-action" onclick="filterTasks('in_progress')">
                 <i class="fas fa-play"></i>
                 <span>In Progress</span>
             </div>
@@ -126,8 +126,16 @@
                             <td th:text="'#' + ${task.orderId}">#001</td>
                             <td>
                                 <div class="service-info">
-                                    <span th:text="${task.serviceType}">Wash & Fold</span>
-                                    <small th:text="${task.clothType}">Mixed Items</small>
+                                    <div class="service-main">
+                                        <span th:text="${task.serviceType}">Wash & Fold</span>
+                                    </div>
+                                    <div class="cloth-type">
+                                        <i class="fas fa-tshirt"></i>
+                                        <span th:if="${task.clothType != null and !#strings.isEmpty(task.clothType)}"
+                                              th:text="${task.clothType}">Mixed Items</span>
+                                        <span th:if="${task.clothType == null or #strings.isEmpty(task.clothType)}"
+                                              class="no-cloth-type">No cloth type specified</span>
+                                    </div>
                                 </div>
                             </td>
                             <td th:text="${task.customerId}">Customer ID</td>

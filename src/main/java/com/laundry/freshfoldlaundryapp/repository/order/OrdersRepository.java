@@ -20,29 +20,30 @@ public class OrdersRepository {
 
     public Integer save(Orders order) {
         try {
-            // Try with special_instructions and price first
-            final String sql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status, special_instructions, price) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            // Try with special_instructions, price, and cloth_type
+            final String sql = "INSERT INTO Orders (customer_id, service_type, cloth_type, pickup_datetime, delivery_datetime, order_time, status, special_instructions, price) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setInt(1, order.getCustomerId());
                 ps.setString(2, order.getServiceType());
-                ps.setTimestamp(3, Timestamp.valueOf(order.getPickupDatetime()));
-                ps.setTimestamp(4, Timestamp.valueOf(order.getDeliveryDatetime()));
-                ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Set current time
-                ps.setString(6, "Pending"); // Initial status
-                ps.setString(7, order.getSpecialInstructions()); // Add special_instructions
-                ps.setDouble(8, order.getPrice() != null ? order.getPrice() : 0.0); // Add price
+                ps.setString(3, order.getClothType()); // Add cloth_type field
+                ps.setTimestamp(4, Timestamp.valueOf(order.getPickupDatetime()));
+                ps.setTimestamp(5, Timestamp.valueOf(order.getDeliveryDatetime()));
+                ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now())); // Set current time
+                ps.setString(7, "Pending"); // Initial status
+                ps.setString(8, order.getSpecialInstructions()); // Add special_instructions
+                ps.setDouble(9, order.getPrice() != null ? order.getPrice() : 0.0); // Add price
                 return ps;
             }, keyHolder);
             return keyHolder.getKey().intValue();
         } catch (Exception e) {
-            // If special_instructions column doesn't exist, fallback without it but with price
-            System.out.println("Special instructions column not found, saving without it: " + e.getMessage());
+            // If cloth_type column doesn't exist, fallback without it but with special_instructions and price
+            System.out.println("Cloth type column not found, saving without it: " + e.getMessage());
             try {
-                final String fallbackSql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status, price) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                final String fallbackSql = "INSERT INTO Orders (customer_id, service_type, pickup_datetime, delivery_datetime, order_time, status, special_instructions, price) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 jdbcTemplate.update(connection -> {
                     PreparedStatement ps = connection.prepareStatement(fallbackSql, Statement.RETURN_GENERATED_KEYS);
@@ -52,11 +53,12 @@ public class OrdersRepository {
                     ps.setTimestamp(4, Timestamp.valueOf(order.getDeliveryDatetime()));
                     ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now())); // Set current time
                     ps.setString(6, "Pending"); // Initial status
-                    ps.setDouble(7, order.getPrice() != null ? order.getPrice() : 0.0); // Add price
+                    ps.setString(7, order.getSpecialInstructions()); // Add special_instructions
+                    ps.setDouble(8, order.getPrice() != null ? order.getPrice() : 0.0); // Add price
                     return ps;
                 }, keyHolder);
 
-                System.out.println("✓ Order saved successfully without special_instructions column but with price");
+                System.out.println("✓ Order saved successfully without cloth_type column but with special_instructions and price");
                 return keyHolder.getKey().intValue();
             } catch (Exception e2) {
                 // Final fallback without price if price column doesn't exist
