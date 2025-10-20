@@ -761,3 +761,11 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
 }
+
+.footer {
+    background: var(--secondary-color);
+    color: #13164a;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: auto;
+}

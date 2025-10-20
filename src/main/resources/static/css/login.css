@@ -177,3 +177,11 @@ body {
 .links a:hover {
     color: #2196f3;
 }
+
+.footer {
+    background: var(--secondary-color);
+    color: #13164a;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: auto;
+}

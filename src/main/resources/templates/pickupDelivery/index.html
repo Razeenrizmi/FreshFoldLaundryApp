@@ -63,7 +63,7 @@
             <nav>
                 <ul class="nav-menu">
                     <li><a th:href="@{/}" class="active">Home</a></li>
-                    <li><a th:href="@{/schedule}">Schedule Pickup</a></li>
+                    <!--<li><a th:href="@{/schedule}">Schedule Pickup</a></li>-->
                     <li><a th:href="@{/track}">Track Order</a></li>
                     <li><a th:href="@{/coordinator}">Coordinator</a></li>
                     <li><a th:href="@{/driver(driverId=1)}">Driver</a></li>
@@ -79,8 +79,8 @@
         <div class="container">
             <h1>Professional Laundry Services</h1>
             <p>Experience the convenience of premium laundry services with free pickup and delivery. Quality cleaning guaranteed.</p>
-            <a th:href="@{/schedule}" class="btn btn-primary btn-lg">Schedule a Pickup</a>
-            <a th:href="@{/track}" class="btn btn-success btn-lg">Track Your Order</a>
+            <a th:href="@{/coordinator}" class="btn btn-primary btn-lg">Assign Tasks</a>
+            <a th:href="@{/track}" class="btn btn-success btn-lg">Track Orders</a>
         </div>
     </section>
 
@@ -116,7 +116,7 @@
 
 <footer class="footer">
     <div class="container">
-        <p>&copy; 2024 FreshFold Laundry Management System. All rights reserved.</p>
+        <p>&copy; 2025 FreshFold Laundry Management System. All rights reserved.</p>
         <p style="margin-top: 10px; opacity: 0.8;">
             <small>Professional laundry services with love and care</small>
         </p>
