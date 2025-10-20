@@ -40,17 +40,20 @@
 
     .password-strength {
       margin-top: 10px;
-      padding: 10px;
+      margin-bottom: 20px; /* Add bottom margin to ensure space before submit button */
+      padding: 8px;
       background: #f5f9ff;
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid #e3f2fd;
+      max-height: 150px; /* Limit maximum height */
+      overflow: hidden;
     }
 
     .strength-meter {
-      height: 4px;
+      height: 3px; /* Reduce height to make it more compact */
       background: #e3f2fd;
       border-radius: 2px;
-      margin: 5px 0;
+      margin: 4px 0;
       overflow: hidden;
     }
 
@@ -68,14 +71,17 @@
     .requirements {
       list-style: none;
       padding: 0;
-      margin: 8px 0 0 0;
+      margin: 6px 0 0 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* Show requirements in 2 columns to save space */
+      gap: 2px 10px;
     }
 
     .requirements li {
-      font-size: 11px;
+      font-size: 10px; /* Smaller font size */
       color: #546e7a;
-      margin: 2px 0;
-      padding-left: 15px;
+      margin: 1px 0;
+      padding-left: 12px;
       position: relative;
     }
 
@@ -85,6 +91,7 @@
       position: absolute;
       left: 0;
       transition: all 0.3s ease;
+      font-size: 9px;
     }
 
     .requirements li.valid::before {
@@ -94,6 +101,83 @@
 
     .requirements li.valid {
       color: #2e7d32;
+    }
+
+    /* Ensure submit button has proper spacing and is always visible */
+    .submit {
+      margin-top: 25px !important;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Add some responsive handling for smaller screens */
+    @media (max-width: 480px) {
+      .requirements {
+        grid-template-columns: 1fr; /* Single column on mobile */
+      }
+
+      .password-strength {
+        max-height: 180px;
+      }
+    }
+
+    /* Strategy pattern validation styles */
+    .strategy-indicator {
+      font-size: 12px;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+    }
+
+    .strategy-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 8px;
+    }
+
+    .strategy-valid {
+      color: #2e7d32;
+    }
+
+    .strategy-invalid {
+      color: #d32f2f;
+    }
+
+    .validation-summary {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f5f9ff;
+      border: 1px solid #e3f2fd;
+      border-radius: 4px;
+    }
+
+    .validation-type {
+      font-size: 14px;
+      margin: 4px 0;
+    }
+
+    .validation-type.valid {
+      color: #2e7d32;
+    }
+
+    .validation-type.invalid {
+      color: #d32f2f;
+    }
+
+    .close-summary {
+      background: none;
+      border: none;
+      color: #546e7a;
+      cursor: pointer;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -299,9 +383,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 strengthFill.classList.add('strength-strong');
                 strengthText.textContent = 'Strong';
                 strengthText.style.color = '#2e7d32';
+
+                // Hide password requirements when password is strong and valid
+                setTimeout(() => {
+                    strengthDiv.style.display = 'none';
+                }, 1500); // Reduced from 2000ms to 1500ms for faster hiding
             }
         } else {
             strengthDiv.style.display = 'none';
+        }
+    });
+
+    // Hide password requirements when user clicks outside or focuses on another field
+    document.getElementById('password').addEventListener('blur', function() {
+        const password = this.value;
+        const strengthDiv = document.getElementById('password-strength');
+
+        // If password meets all requirements, hide the indicator
+        if (password.length >= 8 &&
+            /[A-Z]/.test(password) &&
+            /[a-z]/.test(password) &&
+            /\d/.test(password) &&
+            /[@$!%*?&]/.test(password)) {
+            setTimeout(() => {
+                strengthDiv.style.display = 'none';
+            }, 500);
+        }
+    });
+
+    // Show password requirements when user focuses on password field
+    document.getElementById('password').addEventListener('focus', function() {
+        const password = this.value;
+        const strengthDiv = document.getElementById('password-strength');
+
+        // Only show if password is not empty and doesn't meet all requirements
+        if (password.length > 0) {
+            const isComplete = password.length >= 8 &&
+                              /[A-Z]/.test(password) &&
+                              /[a-z]/.test(password) &&
+                              /\d/.test(password) &&
+                              /[@$!%*?&]/.test(password);
+
+            if (!isComplete) {
+                strengthDiv.style.display = 'block';
+            }
         }
     });
 
@@ -325,28 +450,87 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Form submission validation
-    form.addEventListener('submit', function(e) {
+    // Strategy Pattern Validation Integration
+    let strategyValidationResults = {};
+
+    // Function to validate using backend strategy pattern
+    async function validateWithStrategy() {
+        const formData = {
+            firstName: document.getElementById('firstname').value,
+            lastName: document.getElementById('lastname').value,
+            email: document.getElementById('email').value,
+            phoneNumber: document.getElementById('phoneNumber').value,
+            password: document.getElementById('password').value,
+            address: document.getElementById('Address').value
+        };
+
+        try {
+            const response = await fetch('/validation-demo/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            strategyValidationResults = data;
+            displayStrategyResults(data);
+            return data.allValid;
+        } catch (error) {
+            console.error('Strategy validation error:', error);
+            return false;
+        }
+    }
+
+    // Function to display strategy validation results
+    function displayStrategyResults(data) {
+        // Remove any existing strategy indicators
+        document.querySelectorAll('.strategy-indicator').forEach(el => el.remove());
+
+        // Add strategy validation indicators to each field
+        Object.entries(data.validations || {}).forEach(([fieldName, result]) => {
+            const field = document.getElementById(fieldName) || document.getElementById(fieldName.toLowerCase());
+            if (field) {
+                const indicator = document.createElement('div');
+                indicator.className = `strategy-indicator ${result.valid ? 'strategy-valid' : 'strategy-invalid'}`;
+                indicator.innerHTML = `
+                    <div class="strategy-badge">
+                        ${result.valid ? '✅' : '❌'} Strategy Pattern
+                    </div>
+                    <div class="strategy-message">${result.message}</div>
+                `;
+                field.parentNode.appendChild(indicator);
+            }
+        });
+    }
+
+    // Enhanced form submission with strategy pattern validation
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
+        // First run frontend validations
         const fields = ['firstname', 'lastname', 'Address', 'phoneNumber', 'email', 'password'];
-        let isValid = true;
+        let frontendValid = true;
 
         fields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
             const value = field.value.trim();
 
             if (value === '') {
-                isValid = false;
+                frontendValid = false;
                 const errorDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-error');
                 const successDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-success');
                 showError(field, errorDiv, successDiv, 'This field is required');
             } else if (!field.classList.contains('success')) {
-                isValid = false;
+                frontendValid = false;
             }
         });
 
-        if (isValid) {
+        // Then run strategy pattern validations
+        const strategyValid = await validateWithStrategy();
+
+        if (frontendValid && strategyValid) {
             // Show loading state
             submitBtn.textContent = 'Creating Account...';
             submitBtn.disabled = true;
@@ -356,6 +540,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.submit();
             }, 500);
         } else {
+            // Show validation summary
+            showValidationSummary(frontendValid, strategyValid);
+
             // Scroll to first error
             const firstError = document.querySelector('.input.error');
             if (firstError) {
@@ -364,7 +551,52 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-});
+
+    // Function to show validation summary
+    function showValidationSummary(frontendValid, strategyValid) {
+        // Remove existing summary
+        const existingSummary = document.querySelector('.validation-summary');
+        if (existingSummary) {
+            existingSummary.remove();
+        }
+
+        const summary = document.createElement('div');
+        summary.className = 'validation-summary';
+        summary.innerHTML = `
+            <h4>Validation Results</h4>
+            <div class="validation-type ${frontendValid ? 'valid' : 'invalid'}">
+                ${frontendValid ? '✅' : '❌'} Frontend Validation: ${frontendValid ? 'Passed' : 'Failed'}
+            </div>
+            <div class="validation-type ${strategyValid ? 'valid' : 'invalid'}">
+                ${strategyValid ? '✅' : '❌'} Strategy Pattern Validation: ${strategyValid ? 'Passed' : 'Failed'}
+            </div>
+            <button onclick="this.parentElement.style.display='none'" class="close-summary">×</button>
+        `;
+
+        // Insert summary after the form title
+        const subtitle = document.querySelector('.subtitle');
+        subtitle.parentNode.insertBefore(summary, subtitle.nextSibling);
+    }
+
+    // Add real-time strategy validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.input');
+        inputs.forEach(input => {
+            input.addEventListener('blur', debounce(validateWithStrategy, 300));
+        });
+    });
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 </script>
 
 </body>
