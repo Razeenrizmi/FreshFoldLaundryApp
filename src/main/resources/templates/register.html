@@ -17,14 +17,14 @@
     }
 
     .success-message {
-      color: #2e7d32;
+      color: #1976d2;
       font-size: 12px;
       font-family: 'Poppins', sans-serif;
       margin-top: 5px;
       padding: 5px 10px;
-      background: #e8f5e8;
+      background: #e3f2fd;
       border-radius: 4px;
-      border-left: 3px solid #2e7d32;
+      border-left: 3px solid #1976d2;
       display: none;
     }
 
@@ -34,24 +34,24 @@
     }
 
     .input.success {
-      border-color: #2e7d32 !important;
-      background-color: #e8f5e8 !important;
+      border-color: #1976d2 !important;
+      background-color: #e3f2fd !important;
     }
 
     .password-strength {
       margin-top: 10px;
-      margin-bottom: 20px; /* Add bottom margin to ensure space before submit button */
+      margin-bottom: 20px;
       padding: 8px;
-      background: #f5f9ff;
+      background: #f3f9ff;
       border-radius: 6px;
-      border: 1px solid #e3f2fd;
-      max-height: 150px; /* Limit maximum height */
+      border: 1px solid #bbdefb;
+      max-height: 150px;
       overflow: hidden;
     }
 
     .strength-meter {
-      height: 3px; /* Reduce height to make it more compact */
-      background: #e3f2fd;
+      height: 3px;
+      background: #e1f5fe;
       border-radius: 2px;
       margin: 4px 0;
       overflow: hidden;
@@ -63,23 +63,23 @@
       border-radius: 2px;
     }
 
-    .strength-weak { background: #d32f2f; width: 25%; }
+    .strength-weak { background: #f44336; width: 25%; }
     .strength-fair { background: #ff9800; width: 50%; }
     .strength-good { background: #2196f3; width: 75%; }
-    .strength-strong { background: #2e7d32; width: 100%; }
+    .strength-strong { background: #1976d2; width: 100%; }
 
     .requirements {
       list-style: none;
       padding: 0;
       margin: 6px 0 0 0;
       display: grid;
-      grid-template-columns: 1fr 1fr; /* Show requirements in 2 columns to save space */
+      grid-template-columns: 1fr 1fr;
       gap: 2px 10px;
     }
 
     .requirements li {
-      font-size: 10px; /* Smaller font size */
-      color: #546e7a;
+      font-size: 10px;
+      color: #64b5f6;
       margin: 1px 0;
       padding-left: 12px;
       position: relative;
@@ -87,7 +87,7 @@
 
     .requirements li::before {
       content: '✗';
-      color: #d32f2f;
+      color: #f44336;
       position: absolute;
       left: 0;
       transition: all 0.3s ease;
@@ -96,11 +96,11 @@
 
     .requirements li.valid::before {
       content: '✓';
-      color: #2e7d32;
+      color: #1976d2;
     }
 
     .requirements li.valid {
-      color: #2e7d32;
+      color: #1976d2;
     }
 
     /* Ensure submit button has proper spacing and is always visible */
@@ -114,7 +114,7 @@
     /* Add some responsive handling for smaller screens */
     @media (max-width: 480px) {
       .requirements {
-        grid-template-columns: 1fr; /* Single column on mobile */
+        grid-template-columns: 1fr;
       }
 
       .password-strength {
@@ -128,56 +128,103 @@
       margin-top: 5px;
       display: flex;
       align-items: center;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #f3f9ff;
+      border: 1px solid #bbdefb;
     }
 
     .strategy-badge {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       margin-right: 8px;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: #e3f2fd;
+      color: #1976d2;
+      font-weight: 500;
     }
 
     .strategy-valid {
-      color: #2e7d32;
+      color: #1976d2;
+      border-color: #1976d2;
+      background: #e8f5e8;
     }
 
     .strategy-invalid {
       color: #d32f2f;
+      border-color: #f44336;
+      background: #ffebee;
+    }
+
+    .strategy-valid .strategy-badge {
+      background: #1976d2;
+      color: white;
+    }
+
+    .strategy-invalid .strategy-badge {
+      background: #f44336;
+      color: white;
     }
 
     .validation-summary {
       margin-top: 20px;
-      padding: 10px;
-      background: #f5f9ff;
-      border: 1px solid #e3f2fd;
-      border-radius: 4px;
+      padding: 15px;
+      background: #ffffff;
+      border: 1px solid #bbdefb;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
+      position: relative;
+    }
+
+    .validation-summary h4 {
+      margin: 0 0 10px 0;
+      color: #1565c0;
+      font-size: 16px;
     }
 
     .validation-type {
       font-size: 14px;
-      margin: 4px 0;
+      margin: 8px 0;
+      padding: 6px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .validation-type.valid {
-      color: #2e7d32;
+      color: #1976d2;
+      background: #e3f2fd;
+      border: 1px solid #bbdefb;
     }
 
     .validation-type.invalid {
       color: #d32f2f;
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
     }
 
     .close-summary {
       background: none;
       border: none;
-      color: #546e7a;
+      color: #64b5f6;
       cursor: pointer;
       position: absolute;
-      top: 8px;
-      right: 8px;
-      font-size: 16px;
+      top: 10px;
+      right: 12px;
+      font-size: 18px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .close-summary:hover {
+      background: #e3f2fd;
+      color: #1976d2;
     }
   </style>
 </head>

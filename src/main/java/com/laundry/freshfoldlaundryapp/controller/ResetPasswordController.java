@@ -52,7 +52,8 @@ public class ResetPasswordController {
         user.setPassword(passwordEncoder.encode(password));
         userService.save(user);
 
-        redirectAttributes.addFlashAttribute("success", "Your password has been reset successfully. Please log in with your new password.");
+        // Success message and redirect to login
+        redirectAttributes.addFlashAttribute("message", "Password has been reset successfully. Please login with your new password.");
         return "redirect:/login";
     }
 }

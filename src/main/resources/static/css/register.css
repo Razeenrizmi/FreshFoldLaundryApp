@@ -8,7 +8,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%);
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -17,21 +17,20 @@ body {
 }
 
 .form {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(33, 150, 243, 0.1);
   padding: 40px;
   width: 90%;
   max-width: 450px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #e3f2fd;
   margin: 20px auto;
   min-height: auto;
   overflow: visible;
 }
 
 .title {
-  color: #333;
+  color: #1565c0;
   font-size: 32px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -39,7 +38,7 @@ body {
 }
 
 .subtitle {
-  color: #666;
+  color: #64b5f6;
   font-size: 16px;
   font-weight: 400;
   margin-bottom: 30px;
@@ -60,11 +59,11 @@ body {
 }
 
 .input {
-  background-color: #f8f9fa;
+  background-color: #fafafa;
   border-radius: 12px;
-  border: 2px solid #e9ecef;
+  border: 2px solid #e1f5fe;
   box-sizing: border-box;
-  color: #333;
+  color: #1565c0;
   font-size: 16px;
   height: 56px;
   outline: 0;
@@ -75,13 +74,13 @@ body {
 }
 
 .input:focus {
-  border-color: #667eea;
-  background-color: #fff;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #2196f3;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
 .cut {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border-radius: 10px;
   height: 20px;
   left: 20px;
@@ -102,7 +101,7 @@ body {
 }
 
 .placeholder {
-  color: #65657b;
+  color: #90a4ae;
   font-family: 'Poppins', sans-serif;
   left: 20px;
   line-height: 14px;
@@ -117,12 +116,12 @@ body {
 .input:focus ~ .placeholder,
 .input:not(:placeholder-shown) ~ .placeholder {
   transform: translateY(-30px) translateX(10px) scale(0.85);
-  color: #667eea;
+  color: #2196f3;
   font-weight: 500;
 }
 
 .input:not(:placeholder-shown) ~ .placeholder {
-    color: #546e7a;
+    color: #1565c0;
 }
 
 .input:focus ~ .placeholder {
@@ -130,11 +129,11 @@ body {
 }
 
 .submit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   border-radius: 12px;
   border: 0;
   box-sizing: border-box;
-  color: #fff;
+  color: #ffffff;
   cursor: pointer;
   font-size: 18px;
   font-weight: 600;
@@ -151,7 +150,8 @@ body {
 
 .submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
 }
 
 .submit:active {
@@ -170,14 +170,14 @@ body {
 }
 
 .links a {
-  color: #667eea;
+  color: #2196f3;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .links a:hover {
-  color: #764ba2;
+  color: #1565c0;
   text-decoration: underline;
 }
 
