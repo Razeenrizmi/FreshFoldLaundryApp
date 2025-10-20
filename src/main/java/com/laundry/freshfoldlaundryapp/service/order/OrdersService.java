@@ -57,6 +57,8 @@ public class OrdersService {
                 return orderRepository.findPending();
             case "IN_PROGRESS":
                 return orderRepository.findInProgress();
+            case "PICKED_UP":
+                return orderRepository.findByStatus("Picked_up");
             case "READY_FOR_DELIVERY":
                 return orderRepository.findByStatus("ready_for_delivery");
             case "OUT_FOR_DELIVERY":

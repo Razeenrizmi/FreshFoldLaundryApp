@@ -18,11 +18,13 @@
         </div>
         <div class="navbar-menu">
             <a href="/dashboard" class="nav-link">Home</a>
-            <a href="/manager/reports" class="nav-link">Reports</a>
+           <!-- <a href="/manager/reports" class="nav-link">Reports</a> -->
             <div class="user-profile">
                 <i class="fas fa-user-circle"></i>
                 <span>Manager</span>
-                <a href="/logout" class="logout-btn">Logout</a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
             </div>
         </div>
     </nav>
@@ -148,7 +150,7 @@
                             <th>Order ID</th>
                             <th>Customer</th>
                             <th>Service</th>
-                            <th>Items</th>
+                            <!--<th>Items</th>-->
                             <th>Pickup Status</th>
                             <th>Assign to Staff</th>
                             <th>Actions</th>
@@ -164,8 +166,8 @@
                                     <small th:text="${order.clothType}">Suit</small>
                                 </div>
                             </td>
-                            <td th:text="${order.quantity} != null ? ${order.quantity} + ' items' : '0 items'">2 items</td>
-                            <td><span class="status-badge picked-up">✅ Picked Up</span></td>
+                            <!--<td th:text="${order.quantity} != null ? ${order.quantity} + ' items' : '0 items'">2 items</td>-->
+                            <td><span class="status-badge" th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(order.status, ' ', '-'))}" th:text="${order.status}">Status</span></td>
                             <td>
                                 <select class="staff-select enhanced-dropdown" th:id="'staff-' + ${order.orderId}">
                                     <option value="">Select Staff</option>

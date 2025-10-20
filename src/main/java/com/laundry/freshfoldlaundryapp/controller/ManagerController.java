@@ -35,7 +35,7 @@ public class ManagerController {
 //        List<Order> pendingPayments = ordersService.getOrdersByPaymentStatus("PENDING_VERIFICATION");
 
         // Modified workflow: Get picked up orders needing staff assignment instead of pending orders
-        List<Orders> ordersForAssignment = ordersService.getOrdersByStatusList("Picked Up");  // Changed from "Pending" to "Picked Up"
+        List<Orders> ordersForAssignment = ordersService.getOrdersByStatusList("PICKED_UP");  // Changed from "Pending" to "Picked Up"
 
         // Get all staff members (laundry staff)
         List<User> staffList = userService.getUsersByRole("STAFF");
