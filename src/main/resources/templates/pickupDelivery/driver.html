@@ -83,39 +83,32 @@
                         <span th:if="${order.deliveryDriverId == driverId}" class="badge badge-delivery">🚚 Delivery</span>
                     </td>
                     <td>
-                        <!-- Pickup Actions -->
-                        <form th:if="${order.pickupDriverId == driverId and order.status == 'pickup_assigned'}"
-                              th:action="@{/driver/updateStatus/{id}(id=${order.orderId})}" method="post" style="display: inline;">
-                            <input type="hidden" name="status" value="picked_up"/>
+                        <!-- Pickup Actions - Updated for new workflow -->
+                        <form th:if="${order.pickupDriverId == driverId and order.status == 'Ready for Pickup'}"
+                              th:action="@{/pickup-driver/updateStatus/{id}(id=${order.orderId})}" method="post" style="display: inline;">
+                            <input type="hidden" name="status" value="Picked Up"/>
                             <input type="hidden" name="driverId" th:value="${driverId}"/>
-                            <button type="submit" class="btn btn-success btn-sm">Mark as Picked Up</button>
+                            <button type="submit" class="btn btn-success btn-sm">📦 Mark as Picked Up</button>
                         </form>
 
                         <!-- Delivery Actions - Mark as Delivered (only for out_for_delivery status) -->
                         <form th:if="${order.deliveryDriverId == driverId and order.status == 'out_for_delivery'}"
-                              th:action="@{/driver/updateStatus/{id}(id=${order.orderId})}" method="post" style="display: inline;">
+                              th:action="@{/pickup-driver/updateStatus/{id}(id=${order.orderId})}" method="post" style="display: inline;">
                             <input type="hidden" name="status" value="delivered"/>
                             <input type="hidden" name="driverId" th:value="${driverId}"/>
                             <button type="submit" class="btn btn-success btn-sm">✅ Mark as Delivered</button>
                         </form>
 
-                        <!-- Status indicators -->
-                        <div th:if="${order.status == 'ready_for_delivery'}" class="text-info">
-                            <small>📦 Ready - Waiting for coordinator to send out</small>
-                        </div>
-
-                        <div th:if="${order.status == 'picked_up'}" class="text-success">
-                            <small>✅ Picked up successfully</small>
-                        </div>
-
-                        <div th:if="${order.status == 'delivered'}" class="text-success">
-                            <small>✅ Delivered successfully</small>
-                        </div>
-
-                        <!-- No action available -->
-                        <div th:if="${order.pickupDriverId != driverId and order.deliveryDriverId != driverId}" class="text-muted">
-                            <small>Not assigned to you</small>
-                        </div>
+                        <!-- Show status for orders that don't have available actions -->
+                        <span th:if="${order.pickupDriverId == driverId and order.status == 'Picked Up'}" class="text-muted">
+                            ✅ Pickup Complete
+                        </span>
+                        <span th:if="${order.deliveryDriverId == driverId and order.status == 'delivered'}" class="text-muted">
+                            ✅ Delivered
+                        </span>
+                        <span th:if="${order.status == 'Pending'}" class="text-muted">
+                            ⏳ Awaiting Assignment
+                        </span>
                     </td>
                 </tr>
                 </tbody>

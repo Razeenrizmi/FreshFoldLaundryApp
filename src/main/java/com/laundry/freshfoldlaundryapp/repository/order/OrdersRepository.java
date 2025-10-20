@@ -148,6 +148,33 @@ public class OrdersRepository {
 
     // Add generic method to find orders by status with user information (fixed to use user table)
     public List<Orders> findByStatus(String status) {
+        // Handle the new workflow statuses
+        switch (status.toLowerCase()) {
+            case "pending":
+                return findPending();
+            case "ready for pickup":
+            case "ready_for_pickup":
+                return findByStatusExact("Ready for Pickup");
+            case "picked up":
+            case "picked_up":
+                return findByStatusExact("Picked Up");
+            case "in_progress":
+                return findInProgress();
+            case "completed":
+                return findCompleted();
+            case "ready_for_delivery":
+                return findByStatusExact("ready_for_delivery");
+            case "out_for_delivery":
+                return findByStatusExact("out_for_delivery");
+            case "delivered":
+                return findByStatusExact("delivered");
+            default:
+                return findByStatusExact(status);
+        }
+    }
+
+    // Helper method for exact status matching
+    private List<Orders> findByStatusExact(String status) {
         String sql = "SELECT o.*, u.first_name, u.last_name, u.phone_number, u.address, " +
                     "CONCAT(u.first_name, ' ', u.last_name) as customer_name, " +
                     "u.phone_number as customer_phone, u.address as customer_address " +
@@ -496,5 +523,38 @@ public class OrdersRepository {
             System.err.println("Error assigning staff: " + e.getMessage());
             return false;
         }
+    }
+
+    // Get orders assigned to a specific driver (both pickup and delivery)
+    public List<Orders> findOrdersAssignedToDriver(Long driverId) {
+        String sql = "SELECT o.*, u.first_name, u.last_name, u.phone_number, u.address, " +
+                    "CONCAT(u.first_name, ' ', u.last_name) as customer_name, " +
+                    "u.phone_number as customer_phone, u.address as customer_address " +
+                    "FROM Orders o JOIN user u ON o.customer_id = u.id " +
+                    "WHERE o.pickup_driver_id = ? OR o.delivery_driver_id = ? " +
+                    "ORDER BY o.order_time DESC";
+        return jdbcTemplate.query(sql, new OrderWithCustomerRowMapper(), driverId, driverId);
+    }
+
+    // Get pickup orders for a specific driver
+    public List<Orders> findPickupOrdersForDriver(Long driverId) {
+        String sql = "SELECT o.*, u.first_name, u.last_name, u.phone_number, u.address, " +
+                    "CONCAT(u.first_name, ' ', u.last_name) as customer_name, " +
+                    "u.phone_number as customer_phone, u.address as customer_address " +
+                    "FROM Orders o JOIN user u ON o.customer_id = u.id " +
+                    "WHERE o.pickup_driver_id = ? " +
+                    "ORDER BY o.order_time DESC";
+        return jdbcTemplate.query(sql, new OrderWithCustomerRowMapper(), driverId);
+    }
+
+    // Get delivery orders for a specific driver
+    public List<Orders> findDeliveryOrdersForDriver(Long driverId) {
+        String sql = "SELECT o.*, u.first_name, u.last_name, u.phone_number, u.address, " +
+                    "CONCAT(u.first_name, ' ', u.last_name) as customer_name, " +
+                    "u.phone_number as customer_phone, u.address as customer_address " +
+                    "FROM Orders o JOIN user u ON o.customer_id = u.id " +
+                    "WHERE o.delivery_driver_id = ? " +
+                    "ORDER BY o.order_time DESC";
+        return jdbcTemplate.query(sql, new OrderWithCustomerRowMapper(), driverId);
     }
 }

@@ -139,7 +139,7 @@
         <div class="section-card">
             <div class="section-header">
                 <h2><i class="fas fa-user-plus"></i> Staff Assignment</h2>
-                <span class="section-count" th:text="${#lists.size(ordersForAssignment)} + ' orders'">0 orders</span>
+                <span class="section-count" th:text="${#lists.size(ordersForAssignment)} + ' picked up orders'">0 picked up orders</span>
             </div>
             <div class="table-container">
                 <table class="data-table" th:if="${!#lists.isEmpty(ordersForAssignment)}">
@@ -149,7 +149,7 @@
                             <th>Customer</th>
                             <th>Service</th>
                             <th>Items</th>
-                            <th>Priority</th>
+                            <th>Pickup Status</th>
                             <th>Assign to Staff</th>
                             <th>Actions</th>
                         </tr>
@@ -165,7 +165,7 @@
                                 </div>
                             </td>
                             <td th:text="${order.quantity} != null ? ${order.quantity} + ' items' : '0 items'">2 items</td>
-                            <td><span class="priority-badge normal">Normal</span></td>
+                            <td><span class="status-badge picked-up">✅ Picked Up</span></td>
                             <td>
                                 <select class="staff-select enhanced-dropdown" th:id="'staff-' + ${order.orderId}">
                                     <option value="">Select Staff</option>
@@ -186,7 +186,8 @@
                 </table>
                 <div class="empty-state" th:if="${#lists.isEmpty(ordersForAssignment)}">
                     <i class="fas fa-clipboard-check"></i>
-                    <p>No orders waiting for staff assignment</p>
+                    <p>No picked up orders waiting for staff assignment</p>
+                    <small>Orders will appear here after pickup drivers mark them as "Picked Up"</small>
                 </div>
             </div>
         </div>

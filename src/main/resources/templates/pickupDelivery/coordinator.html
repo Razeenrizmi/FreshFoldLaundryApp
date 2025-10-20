@@ -38,24 +38,31 @@
 
     <div class="card">
         <h2>Delivery Coordinator Dashboard</h2>
-        <p>Assign delivery drivers to completed orders ready for delivery</p>
-        <p><strong>Current View:</strong> <span th:text="${status != null ? #strings.capitalize(status) : 'All'}" class="status-badge"></span> Orders</p>
+        <p>Assign pickup and delivery drivers to orders</p>
+        <p><strong>Current View:</strong> <span th:text="${status != null ? #strings.capitalize(status) : 'Pending'}" class="status-badge"></span> Orders</p>
     </div>
 
-    <!-- Status Filter -->
+    <!-- Status Filter - Updated for new workflow -->
     <div class="card">
         <h3>Filter Orders by Status</h3>
         <div class="filter-buttons">
-            <a th:href="@{/coordinator}" class="btn btn-primary" th:classappend="${status == 'COMPLETED' or status == null ? ' active' : ''}">Completed Orders</a>
-            <a th:href="@{/coordinator(status='ready_for_delivery')}" class="btn btn-secondary" th:classappend="${status == 'ready_for_delivery' ? ' active' : ''}">Ready for Delivery</a>
-            <a th:href="@{/coordinator(status='out_for_delivery')}" class="btn btn-secondary" th:classappend="${status == 'out_for_delivery' ? ' active' : ''}">Out for Delivery</a>
-            <a th:href="@{/coordinator(status='delivered')}" class="btn btn-secondary" th:classappend="${status == 'delivered' ? ' active' : ''}">Delivered</a>
+            <a th:href="@{/coordinator}" class="btn btn-primary" th:classappend="${status == 'Pending' or status == null ? ' active' : ''}">📋 Pending Orders (Pickup Assignment)</a>
+            <a th:href="@{/coordinator(status='Ready for Pickup')}" class="btn btn-secondary" th:classappend="${status == 'Ready for Pickup' ? ' active' : ''}">⏳ Ready for Pickup</a>
+            <a th:href="@{/coordinator(status='Picked Up')}" class="btn btn-secondary" th:classappend="${status == 'Picked Up' ? ' active' : ''}">✅ Picked Up</a>
+            <a th:href="@{/coordinator(status='COMPLETED')}" class="btn btn-secondary" th:classappend="${status == 'COMPLETED' ? ' active' : ''}">🚚 Completed (Delivery Assignment)</a>
+            <a th:href="@{/coordinator(status='ready_for_delivery')}" class="btn btn-secondary" th:classappend="${status == 'ready_for_delivery' ? ' active' : ''}">📦 Ready for Delivery</a>
+            <a th:href="@{/coordinator(status='out_for_delivery')}" class="btn btn-secondary" th:classappend="${status == 'out_for_delivery' ? ' active' : ''}">🚛 Out for Delivery</a>
+            <a th:href="@{/coordinator(status='delivered')}" class="btn btn-secondary" th:classappend="${status == 'delivered' ? ' active' : ''}">✅ Delivered</a>
         </div>
     </div>
 
     <!-- Available Drivers Info -->
     <div class="card" th:if="${drivers != null and !#lists.isEmpty(drivers)}">
-        <h3>Available Delivery Staff</h3>
+        <h3>
+            <span th:if="${status == 'Pending' or status == null}">Available Pickup Drivers</span>
+            <span th:if="${status == 'COMPLETED'}">Available Delivery Drivers</span>
+            <span th:if="${status != 'Pending' and status != 'COMPLETED' and status != null}">Available Drivers</span>
+        </h3>
         <div class="drivers-list">
             <span th:each="driver, iterStat : ${drivers}" class="driver-badge">
                 <span th:text="${driver.name}"></span>
@@ -104,57 +111,77 @@
                     </td>
                     <td th:text="${order.deliveryDriverId != null ? 'Driver ID: ' + order.deliveryDriverId : 'Not Assigned'}"></td>
                     <td>
-                        <!-- Debug Information - Remove this after fixing -->
-                        <div style="background: #f8f9fa; padding: 5px; margin: 5px 0; font-size: 10px; border: 1px solid #dee2e6;">
-                            <strong>DEBUG:</strong><br>
-                            Status: '<span th:text="${order.status}"></span>'<br>
-                            DeliveryDriverId: '<span th:text="${order.deliveryDriverId}"></span>'<br>
-                            Drivers available: <span th:text="${drivers != null and !#lists.isEmpty(drivers)}"></span><br>
-                            Status == 'Completed': <span th:text="${order.status == 'Completed'}"></span><br>
-                            Status == 'COMPLETED': <span th:text="${order.status == 'COMPLETED'}"></span><br>
-                            Status == 'completed': <span th:text="${order.status == 'completed'}"></span><br>
-                            DriverId == null: <span th:text="${order.deliveryDriverId == null}"></span><br>
-                            DriverId == 0: <span th:text="${order.deliveryDriverId == 0}"></span><br>
-                            No Driver Assigned: <span th:text="${order.deliveryDriverId == null or order.deliveryDriverId == 0}"></span>
+                        <!-- PICKUP DRIVER ASSIGNMENT - For Pending Orders -->
+                        <div th:if="${status == 'Pending' or status == null}">
+                            <!-- Assign Pickup Driver for Pending Orders -->
+                            <form th:if="${order.status == 'Pending' and (order.pickupDriverId == null or order.pickupDriverId == 0) and drivers != null and !#lists.isEmpty(drivers)}"
+                                  th:action="@{/assignPickupDriver/{orderId}(orderId=${order.orderId})}" method="post" style="display: inline;">
+                                <select name="driverId" required>
+                                    <option value="">Select Pickup Driver</option>
+                                    <option th:each="driver : ${drivers}" th:value="${driver.id}" th:text="${driver.name + ' (' + driver.contact + ')'}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-success btn-sm">📋 Assign Pickup Driver</button>
+                            </form>
+
+                            <!-- Show when pickup driver already assigned -->
+                            <div th:if="${order.status == 'Pending' and order.pickupDriverId != null and order.pickupDriverId != 0}" class="text-success">
+                                <small>✅ Pickup Driver assigned: ID <span th:text="${order.pickupDriverId}"></span></small>
+                            </div>
+
+                            <!-- Show when no drivers available -->
+                            <div th:if="${order.status == 'Pending' and (order.pickupDriverId == null or order.pickupDriverId == 0) and (drivers == null or #lists.isEmpty(drivers))}" class="text-warning">
+                                <small>⚠️ No pickup drivers available</small>
+                            </div>
                         </div>
 
-                        <!-- Assign Delivery Driver for Completed Orders - Fixed to handle deliveryDriverId=0 -->
-                        <form th:if="${(status == 'COMPLETED' or status == null) and (order.status == 'Completed' or order.status == 'COMPLETED' or order.status == 'completed') and (order.deliveryDriverId == null or order.deliveryDriverId == 0) and drivers != null and !#lists.isEmpty(drivers)}"
-                              th:action="@{/assignDeliveryDriver/{orderId}(orderId=${order.orderId})}" method="post" style="display: inline;">
-                            <select name="driverId" required>
-                                <option value="">Select Driver</option>
-                                <option th:each="driver : ${drivers}" th:value="${driver.id}" th:text="${driver.name + ' (' + driver.contact + ')'}"></option>
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-sm">Assign Delivery Driver</button>
-                        </form>
+                        <!-- DELIVERY DRIVER ASSIGNMENT - For Completed Orders -->
+                        <div th:if="${status == 'COMPLETED'}">
+                            <!-- Assign Delivery Driver for Completed Orders -->
+                            <form th:if="${(order.status == 'Completed' or order.status == 'COMPLETED' or order.status == 'completed') and (order.deliveryDriverId == null or order.deliveryDriverId == 0) and drivers != null and !#lists.isEmpty(drivers)}"
+                                  th:action="@{/assignDeliveryDriver/{orderId}(orderId=${order.orderId})}" method="post" style="display: inline;">
+                                <select name="driverId" required>
+                                    <option value="">Select Delivery Driver</option>
+                                    <option th:each="driver : ${drivers}" th:value="${driver.id}" th:text="${driver.name + ' (' + driver.contact + ')'}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">🚚 Assign Delivery Driver</button>
+                            </form>
 
-                        <!-- Show message when conditions are not met - Only in Completed section -->
-                        <div th:if="${(status == 'COMPLETED' or status == null) and (order.status != 'Completed' and order.status != 'COMPLETED' and order.status != 'completed')}" class="text-muted">
-                            <small>Status is not 'Completed': <span th:text="${order.status}"></span></small>
+                            <!-- Show when delivery driver already assigned -->
+                            <div th:if="${(order.status == 'Completed' or order.status == 'COMPLETED' or order.status == 'completed') and order.deliveryDriverId != null and order.deliveryDriverId != 0}" class="text-info">
+                                <small>✅ Delivery Driver assigned: ID <span th:text="${order.deliveryDriverId}"></span></small>
+                            </div>
+
+                            <!-- Show when no drivers available -->
+                            <div th:if="${(order.status == 'Completed' or order.status == 'COMPLETED' or order.status == 'completed') and (order.deliveryDriverId == null or order.deliveryDriverId == 0) and (drivers == null or #lists.isEmpty(drivers))}" class="text-warning">
+                                <small>⚠️ No delivery drivers available</small>
+                            </div>
                         </div>
 
-                        <div th:if="${(status == 'COMPLETED' or status == null) and (order.status == 'Completed' or order.status == 'COMPLETED' or order.status == 'completed') and order.deliveryDriverId != null and order.deliveryDriverId != 0}" class="text-info">
-                            <small>Driver already assigned: <span th:text="${order.deliveryDriverId}"></span></small>
-                        </div>
+                        <!-- STATUS MANAGEMENT - For other statuses -->
+                        <div th:if="${status != 'Pending' and status != 'COMPLETED'}">
+                            <!-- Mark as Out for Delivery (only for ready_for_delivery status) -->
+                            <form th:if="${status == 'ready_for_delivery' and order.status == 'ready_for_delivery'}"
+                                  th:action="@{/updateStatus/{id}(id=${order.orderId})}" method="post" style="display: inline;">
+                                <input type="hidden" name="status" value="out_for_delivery"/>
+                                <button type="submit" class="btn btn-warning btn-sm">🚛 Send Out for Delivery</button>
+                            </form>
 
-                        <div th:if="${(status == 'COMPLETED' or status == null) and (order.status == 'Completed' or order.status == 'COMPLETED' or order.status == 'completed') and (order.deliveryDriverId == null or order.deliveryDriverId == 0) and (drivers == null or #lists.isEmpty(drivers))}" class="text-warning">
-                            <small>No drivers available for assignment</small>
-                        </div>
+                            <!-- Status indicators for different stages -->
+                            <div th:if="${order.status == 'Ready for Pickup'}" class="text-info">
+                                <small>⏳ Ready for pickup - Driver will collect</small>
+                            </div>
 
-                        <!-- Mark as Out for Delivery (only for ready_for_delivery status and in ready_for_delivery section) -->
-                        <form th:if="${status == 'ready_for_delivery' and order.status == 'ready_for_delivery'}"
-                              th:action="@{/updateStatus/{id}(id=${order.orderId})}" method="post" style="display: inline;">
-                            <input type="hidden" name="status" value="out_for_delivery"/>
-                            <button type="submit" class="btn btn-warning btn-sm">Send Out for Delivery</button>
-                        </form>
+                            <div th:if="${order.status == 'Picked Up'}" class="text-success">
+                                <small>✅ Picked up - Ready for manager assignment</small>
+                            </div>
 
-                        <!-- Status indicators for different stages -->
-                        <div th:if="${order.status == 'out_for_delivery'}" class="text-info">
-                            <small>📦 Out for delivery - Driver will mark as delivered</small>
-                        </div>
+                            <div th:if="${order.status == 'out_for_delivery'}" class="text-info">
+                                <small>📦 Out for delivery - Driver will mark as delivered</small>
+                            </div>
 
-                        <div th:if="${order.status == 'delivered'}" class="text-success">
-                            <small>✅ Delivered by driver</small>
+                            <div th:if="${order.status == 'delivered'}" class="text-success">
+                                <small>✅ Delivered by driver</small>
+                            </div>
                         </div>
                     </td>
                 </tr>

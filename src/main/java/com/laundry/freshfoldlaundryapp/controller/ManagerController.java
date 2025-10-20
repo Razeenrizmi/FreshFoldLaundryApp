@@ -34,8 +34,8 @@ public class ManagerController {
         // Get pending payments for verification
 //        List<Order> pendingPayments = ordersService.getOrdersByPaymentStatus("PENDING_VERIFICATION");
 
-        // Get confirmed orders needing staff assignment
-        List<Orders> ordersForAssignment = ordersService.getOrdersByStatusList("Pending");
+        // Modified workflow: Get picked up orders needing staff assignment instead of pending orders
+        List<Orders> ordersForAssignment = ordersService.getOrdersByStatusList("Picked Up");  // Changed from "Pending" to "Picked Up"
 
         // Get all staff members (laundry staff)
         List<User> staffList = userService.getUsersByRole("STAFF");
@@ -145,7 +145,7 @@ public class ManagerController {
             }
 
             // Check if the order is confirmed and ready for assignment
-            if (!"Pending".equals(order.getStatus())) {
+            if (!"Picked Up".equals(order.getStatus())) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("success", false, "message", "Order is not ready for staff assignment"));
             }
@@ -159,7 +159,7 @@ public class ManagerController {
             }
 
             // Update order status to IN_PROGRESS
-            ordersService.updateOrderStatus(orderId, "IN_PROGRESS");
+            ordersService.updateOrderStatus(orderId, "ASSIGNED");
 
             return ResponseEntity.ok(Map.of(
                 "success", true,

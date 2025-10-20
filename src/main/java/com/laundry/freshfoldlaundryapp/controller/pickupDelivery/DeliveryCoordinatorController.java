@@ -24,16 +24,16 @@ public class DeliveryCoordinatorController {
     public String coordinatorDashboard(Model model, @RequestParam(required = false) String status) {
         List<Orders> orders;
 
-        // If no status is specified, default to 'COMPLETED' orders ready for delivery assignment
+        // Modified workflow: Show pending orders for pickup driver assignment
         if (status == null || status.isEmpty()) {
-            orders = ordersService.getOrdersByStatusList("COMPLETED");
-            status = "COMPLETED"; // Set for display purposes
+            orders = ordersService.getOrdersByStatusList("Pending");  // Changed from "COMPLETED" to "Pending"
+            status = "Pending"; // Set for display purposes
         } else {
             orders = ordersService.getOrdersByStatusList(status);
         }
 
-        // Get available delivery drivers (not currently assigned to active delivery tasks)
-        List<Driver> availableDrivers = driverService.getAvailableDeliveryDrivers();
+        // Get available drivers for the new workflow (use existing method)
+        List<Driver> availableDrivers = driverService.getAllDrivers(); // Use getAllDrivers() since getAvailablePickupDrivers() doesn't exist
         List<Driver> allDrivers = driverService.getAllDrivers(); // Get all drivers for debugging
 
         // Debug logging
@@ -41,11 +41,11 @@ public class DeliveryCoordinatorController {
         System.out.println("Status filter: " + status);
         System.out.println("Orders found: " + orders.size());
         System.out.println("All drivers: " + allDrivers.size());
-        System.out.println("Available drivers: " + availableDrivers.size());
+        System.out.println("Available pickup drivers: " + availableDrivers.size());
 
         for (Orders order : orders) {
             System.out.println("Order " + order.getOrderId() + ": status='" + order.getStatus() +
-                             "', deliveryDriverId=" + order.getDeliveryDriverId());
+                             "', pickupDriverId=" + order.getPickupDriverId());
         }
 
         for (Driver driver : allDrivers) {
@@ -65,8 +65,15 @@ public class DeliveryCoordinatorController {
         try {
             boolean success = ordersService.assignPickupDriver(orderId, driverId);
             if (success) {
-                System.out.println("SUCCESS: Pickup driver assigned successfully");
-                redirectAttributes.addFlashAttribute("successMessage", "Pickup driver assigned successfully!");
+                // Update status to "Ready for Pickup" after successful pickup driver assignment
+                boolean statusUpdated = ordersService.updateOrderStatus(orderId, "Ready for Pickup");
+                if (statusUpdated) {
+                    System.out.println("SUCCESS: Pickup driver assigned and status updated to Ready for Pickup");
+                    redirectAttributes.addFlashAttribute("successMessage", "Pickup driver assigned successfully! Order is now ready for pickup.");
+                } else {
+                    System.out.println("SUCCESS: Pickup driver assigned but failed to update status automatically");
+                    redirectAttributes.addFlashAttribute("successMessage", "Pickup driver assigned successfully!");
+                }
             } else {
                 System.err.println("ERROR: Failed to assign pickup driver - database operation returned false");
                 redirectAttributes.addFlashAttribute("errorMessage", "Failed to assign pickup driver. Please check if the order exists and database columns are present.");

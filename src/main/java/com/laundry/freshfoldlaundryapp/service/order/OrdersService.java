@@ -309,6 +309,22 @@ public class OrdersService {
         return orderRepository.assignStaff(orderId, staffId);
     }
 
+    // Get orders assigned to a specific driver (both pickup and delivery)
+    public List<Orders> getOrdersAssignedToDriver(Long driverId) {
+        return orderRepository.findOrdersAssignedToDriver(driverId);
+    }
+
+    // Get pickup orders for a specific driver
+    public List<Orders> getPickupOrdersForDriver(Long driverId) {
+        return orderRepository.findPickupOrdersForDriver(driverId);
+    }
+
+    // Get delivery orders for a specific driver
+    public List<Orders> getDeliveryOrdersForDriver(Long driverId) {
+        return orderRepository.findDeliveryOrdersForDriver(driverId);
+    }
+
+    // Update order status
     public boolean updateOrderStatus(Integer orderId, String status) {
         return orderRepository.updateOrderStatus(orderId, status);
     }
