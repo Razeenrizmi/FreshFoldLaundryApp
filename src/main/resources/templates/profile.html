@@ -8,6 +8,72 @@
         .profile-view { margin-bottom: 2em; }
         .profile-label { font-weight: bold; margin-right: 0.5em; }
         .profile-row { margin-bottom: 1em; }
+
+        /* Validation Styles */
+        .error-message {
+            color: #d32f2f;
+            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 5px;
+            padding: 5px 10px;
+            background: #ffebee;
+            border-radius: 4px;
+            border-left: 3px solid #d32f2f;
+            display: none;
+        }
+
+        .success-message {
+            color: #2e7d32;
+            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 5px;
+            padding: 5px 10px;
+            background: #e8f5e8;
+            border-radius: 4px;
+            border-left: 3px solid #2e7d32;
+            display: none;
+        }
+
+        .input.error {
+            border-color: #d32f2f !important;
+            background-color: #ffebee !important;
+        }
+
+        .input.success {
+            border-color: #2e7d32 !important;
+            background-color: #e8f5e8 !important;
+        }
+
+        .validation-summary {
+            margin: 15px 0;
+            padding: 10px;
+            background: #fff3e0;
+            border: 1px solid #ffcc02;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .validation-summary.error {
+            background: #ffebee;
+            border-color: #d32f2f;
+        }
+
+        .validation-summary.success {
+            background: #e8f5e8;
+            border-color: #2e7d32;
+        }
+
+        .validation-summary h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .validation-summary ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -24,30 +90,44 @@
     </div>
 
     <!-- Edit form, hidden by default -->
-    <form id="profileForm" class="hidden" th:action="@{/profile/update}" th:object="${profileDto}" method="post">
+    <form id="profileForm" class="hidden" th:action="@{/profile/update}" th:object="${profileDto}" method="post" novalidate>
         <div class="title">Welcome</div>
         <div class="subtitle">Update User Details</div>
+
+        <div class="validation-summary" id="validationSummary">
+            <h4 id="summaryTitle"></h4>
+            <ul id="summaryList"></ul>
+        </div>
+
         <div class="input-container ic1">
             <input id="firstname" class="input" type="text" placeholder=" " th:field="*{firstName}" required  />
             <div class="cut"></div>
             <label for="firstname" class="placeholder">First name</label>
+            <div id="firstname-error" class="error-message"></div>
+            <div id="firstname-success" class="success-message"></div>
         </div>
         <div class="input-container ic2">
             <input id="lastname" class="input" type="text" placeholder=" " th:field="*{lastName}" required />
             <div class="cut"></div>
             <label for="lastname" class="placeholder">Last name</label>
+            <div id="lastname-error" class="error-message"></div>
+            <div id="lastname-success" class="success-message"></div>
         </div>
         <div class="input-container ic2">
             <input id="Address" class="input" type="text" placeholder=" " th:field="*{address}" required  />
             <div class="cut"></div>
             <label for="Address" class="placeholder">Address</label>
+            <div id="address-error" class="error-message"></div>
+            <div id="address-success" class="success-message"></div>
         </div>
         <div class="input-container ic2">
-            <input id="phoneNumber" class="input" type="text" placeholder=" " th:field="*{phoneNumber}" required  />
+            <input id="phoneNumber" class="input" type="tel" placeholder=" " th:field="*{phoneNumber}" required  />
             <div class="cut"></div>
             <label for="phoneNumber" class="placeholder">Phone Number</label>
+            <div id="phone-error" class="error-message"></div>
+            <div id="phone-success" class="success-message"></div>
         </div>
-        <button type="submit" class="submit">Submit</button>
+        <button type="submit" class="submit" id="submitBtn">Update Profile</button>
         <button type="button" onclick="hideEditForm()">Cancel</button>
     </form>
     <div class="links">
@@ -56,14 +136,236 @@
     </div>
 </div>
 <script>
-    function showEditForm() {
-        document.getElementById('profileView').classList.add('hidden');
-        document.getElementById('profileForm').classList.remove('hidden');
+let validationEnabled = false;
+
+function showEditForm() {
+    document.getElementById('profileView').classList.add('hidden');
+    document.getElementById('profileForm').classList.remove('hidden');
+
+    if (!validationEnabled) {
+        initializeValidation();
+        validationEnabled = true;
     }
-    function hideEditForm() {
-        document.getElementById('profileForm').classList.add('hidden');
-        document.getElementById('profileView').classList.remove('hidden');
+
+    document.getElementById('firstname').focus();
+}
+
+function hideEditForm() {
+    document.getElementById('profileForm').classList.add('hidden');
+    document.getElementById('profileView').classList.remove('hidden');
+    clearValidationStates();
+    hideValidationSummary();
+}
+
+function initializeValidation() {
+    const form = document.getElementById('profileForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    const patterns = {
+        name: /^[a-zA-Z\s]{2,30}$/,
+        phone: /^[0-9]{10,15}$/,
+        address: /^.{10,200}$/
+    };
+
+    function validateField(fieldId, pattern, errorMsg, successMsg) {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-error');
+        const successDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-success');
+
+        field.addEventListener('input', function() {
+            const value = this.value.trim();
+
+            if (value === '') {
+                showFieldError(field, errorDiv, successDiv, '');
+                return;
+            }
+
+            if (pattern.test(value)) {
+                showFieldSuccess(field, errorDiv, successDiv, successMsg);
+            } else {
+                showFieldError(field, errorDiv, successDiv, errorMsg);
+            }
+            updateValidationSummary();
+        });
+
+        field.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value === '') {
+                showFieldError(field, errorDiv, successDiv, 'This field is required');
+                updateValidationSummary();
+            }
+        });
     }
+
+    function showFieldError(field, errorDiv, successDiv, message) {
+        field.classList.remove('success');
+        field.classList.add('error');
+        errorDiv.textContent = message;
+        errorDiv.style.display = message ? 'block' : 'none';
+        successDiv.style.display = 'none';
+    }
+
+    function showFieldSuccess(field, errorDiv, successDiv, message) {
+        field.classList.remove('error');
+        field.classList.add('success');
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+        errorDiv.style.display = 'none';
+    }
+
+    // Phone number validation (digits only)
+    document.getElementById('phoneNumber').addEventListener('input', function(e) {
+        // Remove any non-digit characters
+        let value = e.target.value.replace(/[^\d]/g, '');
+        e.target.value = value;
+
+        const errorDiv = document.getElementById('phone-error');
+        const successDiv = document.getElementById('phone-success');
+
+        if (value === '') {
+            showFieldError(e.target, errorDiv, successDiv, '');
+        } else if (value.length < 10) {
+            showFieldError(e.target, errorDiv, successDiv, 'Phone number must be at least 10 digits');
+        } else if (value.length > 15) {
+            showFieldError(e.target, errorDiv, successDiv, 'Phone number cannot exceed 15 digits');
+        } else {
+            showFieldSuccess(e.target, errorDiv, successDiv, 'Valid phone number');
+        }
+        updateValidationSummary();
+    });
+
+    // Initialize field validations
+    validateField('firstname', patterns.name, 'First name should contain only letters and be 2-30 characters long', 'Valid first name');
+    validateField('lastname', patterns.name, 'Last name should contain only letters and be 2-30 characters long', 'Valid last name');
+
+    // Address validation
+    document.getElementById('Address').addEventListener('input', function() {
+        const value = this.value.trim();
+        const errorDiv = document.getElementById('address-error');
+        const successDiv = document.getElementById('address-success');
+
+        if (value === '') {
+            showFieldError(this, errorDiv, successDiv, '');
+        } else if (value.length < 10) {
+            showFieldError(this, errorDiv, successDiv, 'Address should be at least 10 characters long');
+        } else if (value.length > 200) {
+            showFieldError(this, errorDiv, successDiv, 'Address should not exceed 200 characters');
+        } else {
+            showFieldSuccess(this, errorDiv, successDiv, 'Valid address');
+        }
+        updateValidationSummary();
+    });
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const fields = ['firstname', 'lastname', 'Address', 'phoneNumber'];
+        let isValid = true;
+        let errors = [];
+
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            const value = field.value.trim();
+
+            if (value === '') {
+                isValid = false;
+                const errorDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-error');
+                const successDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-success');
+                showFieldError(field, errorDiv, successDiv, 'This field is required');
+
+                const fieldName = field.previousElementSibling?.textContent || fieldId;
+                errors.push(fieldName + ' is required');
+            } else if (!field.classList.contains('success')) {
+                isValid = false;
+                const fieldName = field.previousElementSibling?.textContent || fieldId;
+                errors.push(fieldName + ' is invalid');
+            }
+        });
+
+        if (isValid) {
+            submitBtn.textContent = 'Updating Profile...';
+            submitBtn.disabled = true;
+            showValidationSummary(true, 'Profile validation passed!', ['All fields are valid and ready to update.']);
+
+            setTimeout(() => {
+                this.submit();
+            }, 500);
+        } else {
+            showValidationSummary(false, 'Please fix the following errors:', errors);
+            const firstError = document.querySelector('.input.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+}
+
+function updateValidationSummary() {
+    const fields = ['firstname', 'lastname', 'Address', 'phoneNumber'];
+    let validCount = fields.filter(fieldId =>
+        document.getElementById(fieldId).classList.contains('success')
+    ).length;
+
+    if (validCount === fields.length) {
+        showValidationSummary(true, 'All fields are valid!', [validCount + '/' + fields.length + ' fields completed successfully']);
+    } else if (validCount > 0) {
+        showValidationSummary(null, 'Profile completion progress', [validCount + '/' + fields.length + ' fields completed']);
+    } else {
+        hideValidationSummary();
+    }
+}
+
+function showValidationSummary(isSuccess, title, messages) {
+    const summary = document.getElementById('validationSummary');
+    const titleEl = document.getElementById('summaryTitle');
+    const listEl = document.getElementById('summaryList');
+
+    titleEl.textContent = title;
+    listEl.innerHTML = '';
+
+    messages.forEach(message => {
+        const li = document.createElement('li');
+        li.textContent = message;
+        listEl.appendChild(li);
+    });
+
+    summary.className = 'validation-summary';
+    if (isSuccess === true) {
+        summary.classList.add('success');
+        titleEl.style.color = '#2e7d32';
+    } else if (isSuccess === false) {
+        summary.classList.add('error');
+        titleEl.style.color = '#d32f2f';
+    } else {
+        titleEl.style.color = '#f57c00';
+    }
+
+    summary.style.display = 'block';
+}
+
+function hideValidationSummary() {
+    document.getElementById('validationSummary').style.display = 'none';
+}
+
+function clearValidationStates() {
+    const fields = ['firstname', 'lastname', 'Address', 'phoneNumber'];
+
+    fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-error');
+        const successDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-success');
+
+        field.classList.remove('error', 'success');
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+    });
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.textContent = 'Update Profile';
+    submitBtn.disabled = false;
+}
 </script>
 </body>
 </html>

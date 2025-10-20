@@ -3,47 +3,367 @@
 <head>
   <title>Registration</title>
   <link rel="stylesheet" href="/css/register.css">
+  <style>
+    .error-message {
+      color: #d32f2f;
+      font-size: 12px;
+      font-family: 'Poppins', sans-serif;
+      margin-top: 5px;
+      padding: 5px 10px;
+      background: #ffebee;
+      border-radius: 4px;
+      border-left: 3px solid #d32f2f;
+      display: none;
+    }
+
+    .success-message {
+      color: #2e7d32;
+      font-size: 12px;
+      font-family: 'Poppins', sans-serif;
+      margin-top: 5px;
+      padding: 5px 10px;
+      background: #e8f5e8;
+      border-radius: 4px;
+      border-left: 3px solid #2e7d32;
+      display: none;
+    }
+
+    .input.error {
+      border-color: #d32f2f !important;
+      background-color: #ffebee !important;
+    }
+
+    .input.success {
+      border-color: #2e7d32 !important;
+      background-color: #e8f5e8 !important;
+    }
+
+    .password-strength {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f5f9ff;
+      border-radius: 8px;
+      border: 1px solid #e3f2fd;
+    }
+
+    .strength-meter {
+      height: 4px;
+      background: #e3f2fd;
+      border-radius: 2px;
+      margin: 5px 0;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .strength-weak { background: #d32f2f; width: 25%; }
+    .strength-fair { background: #ff9800; width: 50%; }
+    .strength-good { background: #2196f3; width: 75%; }
+    .strength-strong { background: #2e7d32; width: 100%; }
+
+    .requirements {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+    }
+
+    .requirements li {
+      font-size: 11px;
+      color: #546e7a;
+      margin: 2px 0;
+      padding-left: 15px;
+      position: relative;
+    }
+
+    .requirements li::before {
+      content: '✗';
+      color: #d32f2f;
+      position: absolute;
+      left: 0;
+      transition: all 0.3s ease;
+    }
+
+    .requirements li.valid::before {
+      content: '✓';
+      color: #2e7d32;
+    }
+
+    .requirements li.valid {
+      color: #2e7d32;
+    }
+  </style>
 </head>
 <body>
 <div class="form">
-  <form th:action="@{/register}" th:object="${user}" method="post">
+  <form th:action="@{/register}" th:object="${user}" method="post" id="registrationForm" novalidate>
   <div class="title">Welcome</div>
   <div class="subtitle">Let's create your account!</div>
+
   <div class="input-container ic1">
-    <input id="firstname" class="input" type="text" placeholder=" " th:field="*{firstName}" required  />
+    <input id="firstname" class="input" type="text" placeholder=" " th:field="*{firstName}" required />
     <div class="cut"></div>
     <label for="firstname" class="placeholder">First name</label>
+    <div id="firstname-error" class="error-message"></div>
+    <div id="firstname-success" class="success-message"></div>
   </div>
+
   <div class="input-container ic2">
     <input id="lastname" class="input" type="text" placeholder=" " th:field="*{lastName}" required />
     <div class="cut"></div>
     <label for="lastname" class="placeholder">Last name</label>
+    <div id="lastname-error" class="error-message"></div>
+    <div id="lastname-success" class="success-message"></div>
   </div>
+
   <div class="input-container ic2">
-    <input id="Address" class="input" type="text" placeholder=" "th:field="*{address}" required  />
+    <input id="Address" class="input" type="text" placeholder=" "th:field="*{address}" required />
     <div class="cut"></div>
     <label for="Address" class="placeholder">Address</label>
+    <div id="address-error" class="error-message"></div>
+    <div id="address-success" class="success-message"></div>
   </div>
+
   <div class="input-container ic2">
-    <input id="phoneNumber" class="input" type="text" placeholder=" "th:field="*{phoneNumber}" required  />
+    <input id="phoneNumber" class="input" type="tel" placeholder=" "th:field="*{phoneNumber}" required />
     <div class="cut"></div>
     <label for="phoneNumber" class="placeholder">Phone Number</label>
+    <div id="phone-error" class="error-message"></div>
+    <div id="phone-success" class="success-message"></div>
   </div>
+
   <div class="input-container ic2">
-    <input id="email" class="input" type="text" placeholder=" " th:field="*{email}" required  />
+    <input id="email" class="input" type="email" placeholder=" " th:field="*{email}" required />
     <div class="cut cut-short"></div>
     <label for="email" class="placeholder">Email</label>
+    <div id="email-error" class="error-message"></div>
+    <div id="email-success" class="success-message"></div>
   </div>
+
   <div class="input-container ic2">
     <input id="password" class="input" type="password" placeholder=" " th:field="*{password}" required />
     <div class="cut"></div>
     <label for="password" class="placeholder">Password</label>
+    <div id="password-error" class="error-message"></div>
+    <div class="password-strength" id="password-strength" style="display: none;">
+      <div class="strength-meter">
+        <div class="strength-fill" id="strength-fill"></div>
+      </div>
+      <div id="strength-text" style="font-size: 12px; font-weight: 600; color: #546e7a;"></div>
+      <ul class="requirements">
+        <li id="req-length">At least 8 characters</li>
+        <li id="req-uppercase">One uppercase letter</li>
+        <li id="req-lowercase">One lowercase letter</li>
+        <li id="req-number">One number</li>
+        <li id="req-special">One special character</li>
+      </ul>
+    </div>
   </div>
-  <button type="submit" class="submit">submit</button>
+
+  <button type="submit" class="submit" id="submitBtn">Submit</button>
   </form>
     <div class="links">
         <a href="/login">Already have an account? Login</a>
       </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registrationForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Validation patterns
+    const patterns = {
+        name: /^[a-zA-Z\s]{2,30}$/,
+        phone: /^[0-9]{10,15}$/,
+        email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    };
+
+    // Real-time validation functions
+    function validateField(fieldId, pattern, errorMsg, successMsg) {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-error');
+        const successDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-success');
+
+        field.addEventListener('input', function() {
+            const value = this.value.trim();
+
+            if (value === '') {
+                showError(field, errorDiv, successDiv, '');
+                return;
+            }
+
+            if (pattern.test(value)) {
+                showSuccess(field, errorDiv, successDiv, successMsg);
+            } else {
+                showError(field, errorDiv, successDiv, errorMsg);
+            }
+        });
+
+        field.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value === '') {
+                showError(field, errorDiv, successDiv, 'This field is required');
+            }
+        });
+    }
+
+    function showError(field, errorDiv, successDiv, message) {
+        field.classList.remove('success');
+        field.classList.add('error');
+        errorDiv.textContent = message;
+        errorDiv.style.display = message ? 'block' : 'none';
+        successDiv.style.display = 'none';
+    }
+
+    function showSuccess(field, errorDiv, successDiv, message) {
+        field.classList.remove('error');
+        field.classList.add('success');
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+        errorDiv.style.display = 'none';
+    }
+
+    // Phone number specific validation (digits only)
+    document.getElementById('phoneNumber').addEventListener('input', function(e) {
+        // Remove any non-digit characters
+        let value = e.target.value.replace(/[^\d]/g, '');
+        e.target.value = value;
+
+        const errorDiv = document.getElementById('phone-error');
+        const successDiv = document.getElementById('phone-success');
+
+        if (value === '') {
+            showError(e.target, errorDiv, successDiv, '');
+            return;
+        }
+
+        if (value.length < 10) {
+            showError(e.target, errorDiv, successDiv, 'Phone number must be at least 10 digits');
+        } else if (value.length > 10) {
+            showError(e.target, errorDiv, successDiv, 'Phone number cannot exceed 10 digits');
+        } else {
+            showSuccess(e.target, errorDiv, successDiv, 'Valid phone number');
+        }
+    });
+
+    // Password strength checker
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const strengthDiv = document.getElementById('password-strength');
+        const strengthFill = document.getElementById('strength-fill');
+        const strengthText = document.getElementById('strength-text');
+
+        if (password.length > 0) {
+            strengthDiv.style.display = 'block';
+
+            let strength = 0;
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /\d/.test(password),
+                special: /[@$!%*?&]/.test(password)
+            };
+
+            // Update requirement indicators
+            document.getElementById('req-length').classList.toggle('valid', requirements.length);
+            document.getElementById('req-uppercase').classList.toggle('valid', requirements.uppercase);
+            document.getElementById('req-lowercase').classList.toggle('valid', requirements.lowercase);
+            document.getElementById('req-number').classList.toggle('valid', requirements.number);
+            document.getElementById('req-special').classList.toggle('valid', requirements.special);
+
+            // Calculate strength
+            strength = Object.values(requirements).filter(Boolean).length;
+
+            // Update strength meter
+            strengthFill.className = 'strength-fill';
+            if (strength <= 2) {
+                strengthFill.classList.add('strength-weak');
+                strengthText.textContent = 'Weak';
+                strengthText.style.color = '#d32f2f';
+            } else if (strength === 3) {
+                strengthFill.classList.add('strength-fair');
+                strengthText.textContent = 'Fair';
+                strengthText.style.color = '#ff9800';
+            } else if (strength === 4) {
+                strengthFill.classList.add('strength-good');
+                strengthText.textContent = 'Good';
+                strengthText.style.color = '#2196f3';
+            } else if (strength === 5) {
+                strengthFill.classList.add('strength-strong');
+                strengthText.textContent = 'Strong';
+                strengthText.style.color = '#2e7d32';
+            }
+        } else {
+            strengthDiv.style.display = 'none';
+        }
+    });
+
+    // Initialize field validations
+    validateField('firstname', patterns.name, 'Name should contain only letters and be 2-30 characters long', 'Valid first name');
+    validateField('lastname', patterns.name, 'Name should contain only letters and be 2-30 characters long', 'Valid last name');
+    validateField('email', patterns.email, 'Please enter a valid email address', 'Valid email address');
+
+    // Address validation (basic check for minimum length)
+    document.getElementById('Address').addEventListener('input', function() {
+        const value = this.value.trim();
+        const errorDiv = document.getElementById('address-error');
+        const successDiv = document.getElementById('address-success');
+
+        if (value === '') {
+            showError(this, errorDiv, successDiv, '');
+        } else if (value.length < 10) {
+            showError(this, errorDiv, successDiv, 'Address should be at least 10 characters long');
+        } else {
+            showSuccess(this, errorDiv, successDiv, 'Valid address');
+        }
+    });
+
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const fields = ['firstname', 'lastname', 'Address', 'phoneNumber', 'email', 'password'];
+        let isValid = true;
+
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            const value = field.value.trim();
+
+            if (value === '') {
+                isValid = false;
+                const errorDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-error');
+                const successDiv = document.getElementById(fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-success');
+                showError(field, errorDiv, successDiv, 'This field is required');
+            } else if (!field.classList.contains('success')) {
+                isValid = false;
+            }
+        });
+
+        if (isValid) {
+            // Show loading state
+            submitBtn.textContent = 'Creating Account...';
+            submitBtn.disabled = true;
+
+            // Submit the form
+            setTimeout(() => {
+                this.submit();
+            }, 500);
+        } else {
+            // Scroll to first error
+            const firstError = document.querySelector('.input.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+});
+</script>
 </body>
 </html>
