@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Password Reset Token</title>
+    <link rel="stylesheet" href="/css/token-display.css">
+    <style>
+        .token-display {
+            background: #f0f8ff;
+            border: 2px solid #4a90e2;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .token-code {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c5282;
+            letter-spacing: 3px;
+            margin: 10px 0;
+        }
+        .countdown {
+            font-size: 1.2em;
+            color: #e53e3e;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .instructions {
+            color: #4a5568;
+            margin: 15px 0;
+        }
+        .auto-redirect {
+            background: #e6fffa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            color: #234e52;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Password Reset Token Generated</h2>
+
+    <div class="token-display">
+        <h3>Your Reset Token:</h3>
+        <div class="token-code" th:text="${token}"></div>
+        <div class="instructions">
+            Memorize this token - it will disappear in <span class="countdown" id="countdown">10</span> seconds
+        </div>
+        <div class="instructions">
+            Token expires in 15 minutes
+        </div>
+    </div>
+
+    <div class="auto-redirect">
+        <p>You will be automatically redirected to enter this token shortly.</p>
+        <p>If you miss the token, you can request a new one from the forgot password page.</p>
+    </div>
+
+    <div class="links">
+        <a href="/forgot-password">Request New Token</a> |
+        <a th:href="@{'/forgot-password/verify-token?email=' + ${email}}">Enter Token Now</a>
+    </div>
+</div>
+
+<script>
+    let countdown = 10;
+    const countdownElement = document.getElementById('countdown');
+    const tokenElement = document.querySelector('.token-code');
+
+    const timer = setInterval(() => {
+        countdown--;
+        countdownElement.textContent = countdown;
+
+        if (countdown <= 5) {
+            countdownElement.style.color = '#e53e3e';
+            if (countdown <= 3) {
+                tokenElement.style.animation = 'blink 0.5s infinite';
+            }
+        }
+
+        if (countdown <= 0) {
+            clearInterval(timer);
+            // Hide the token
+            tokenElement.textContent = '******';
+            tokenElement.style.animation = 'none';
+            countdownElement.textContent = 'Token Hidden';
+            countdownElement.style.color = '#718096';
+
+            // Auto redirect after token is hidden
+            setTimeout(() => {
+                window.location.href = '/forgot-password/verify-token?email=' + encodeURIComponent('[[${email}]]');
+            }, 2000);
+        }
+    }, 1000);
+</script>
+
+<style>
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+    }
+</style>
+</body>
+</html>

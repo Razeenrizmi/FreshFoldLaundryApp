@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Reset Token</title>
+    <link rel="stylesheet" href="/css/verify-token.css">
+    <style>
+        .token-input {
+            font-size: 1.5em;
+            text-align: center;
+            letter-spacing: 3px;
+            padding: 15px;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            width: 200px;
+            margin: 20px auto;
+            display: block;
+        }
+        .instructions {
+            text-align: center;
+            color: #4a5568;
+            margin: 20px 0;
+        }
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .email-display {
+            background: #f7fafc;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Enter Reset Token</h2>
+
+    <div class="email-display">
+        Reset token for: <strong th:text="${email}"></strong>
+    </div>
+
+    <div class="instructions">
+        Enter the 6-digit token that was displayed to you:
+    </div>
+
+    <div th:if="${errorMessage}" class="error">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <form th:action="@{/forgot-password/verify-token}" method="post">
+        <input type="hidden" name="email" th:value="${email}" />
+
+        <input type="text"
+               name="token"
+               class="token-input"
+               placeholder="000000"
+               maxlength="6"
+               pattern="[0-9]{6}"
+               required
+               autocomplete="off">
+
+        <div class="instructions">
+            <small>Token expires in 15 minutes from generation</small>
+        </div>
+
+        <button type="submit">Verify Token</button>
+    </form>
+
+    <div class="links">
+        <a href="/forgot-password">Request New Token</a>
+    </div>
+</div>
+
+<script>
+    // Auto-format token input (only numbers, max 6 digits)
+    const tokenInput = document.querySelector('.token-input');
+
+    tokenInput.addEventListener('input', function(e) {
+        // Remove any non-digit characters
+        let value = e.target.value.replace(/\D/g, '');
+
+        // Limit to 6 digits
+        if (value.length > 6) {
+            value = value.substring(0, 6);
+        }
+
+        e.target.value = value;
+
+        // Auto-submit when 6 digits are entered
+        if (value.length === 6) {
+            setTimeout(() => {
+                e.target.closest('form').submit();
+            }, 500);
+        }
+    });
+
+    // Focus on the input when page loads
+    window.addEventListener('load', () => {
+        tokenInput.focus();
+    });
+</script>
+</body>
+</html>
+

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Pattern Validation Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .validation-section {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .strategy-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .strategy-card.valid {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .strategy-card.invalid {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .strategy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .strategy-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .strategy-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .strategy-status.valid {
+            background: #28a745;
+            color: white;
+        }
+
+        .strategy-status.invalid {
+            background: #dc3545;
+            color: white;
+        }
+
+        .strategy-message {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .strategy-info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #0066cc;
+            margin-top: 10px;
+        }
+
+        .validate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+
+        .validate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .overall-status {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .overall-status.valid {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .overall-status.invalid {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Strategy Pattern Validation Demo</h1>
+            <p>See how different validation strategies work in real-time</p>
+        </div>
+
+        <div class="content">
+            <div class="form-section">
+                <h2 class="section-title">User Registration Form</h2>
+                <form id="demoForm">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="firstName" placeholder="Enter first name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" placeholder="Enter last name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Enter email address">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter phone number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" name="address" placeholder="Enter address">
+                    </div>
+
+                    <button type="button" class="validate-btn" onclick="validateForm()">
+                        🔍 Validate with Strategy Pattern
+                    </button>
+                </form>
+            </div>
+
+            <div class="validation-section">
+                <h2 class="section-title">Validation Results</h2>
+
+                <div id="overallStatus" class="overall-status" style="display: none;">
+                    <span id="statusText"></span>
+                </div>
+
+                <div id="validationResults">
+                    <p style="text-align: center; color: #666; margin: 50px 0;">
+                        👆 Fill out the form and click "Validate" to see the strategy pattern in action!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function validateForm() {
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                password: document.getElementById('password').value,
+                address: document.getElementById('address').value
+            };
+
+            try {
+                const response = await fetch('/validation-demo/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                displayValidationResults(data);
+            } catch (error) {
+                console.error('Validation error:', error);
+                document.getElementById('validationResults').innerHTML =
+                    '<p style="color: red; text-align: center;">Error occurred during validation</p>';
+            }
+        }
+
+        function displayValidationResults(data) {
+            const resultsContainer = document.getElementById('validationResults');
+            const overallStatus = document.getElementById('overallStatus');
+            const statusText = document.getElementById('statusText');
+
+            // Show overall status
+            overallStatus.style.display = 'block';
+            if (data.allValid) {
+                overallStatus.className = 'overall-status valid';
+                statusText.textContent = '✅ All Validations Passed!';
+            } else {
+                overallStatus.className = 'overall-status invalid';
+                statusText.textContent = '❌ Some Validations Failed';
+            }
+
+            // Display strategy results
+            let html = '';
+            data.strategies.forEach(strategy => {
+                const statusClass = strategy.valid ? 'valid' : 'invalid';
+                const statusIcon = strategy.valid ? '✅' : '❌';
+                const statusText = strategy.valid ? 'Valid' : 'Invalid';
+
+                html += `
+                    <div class="strategy-card ${statusClass}">
+                        <div class="strategy-header">
+                            <span class="strategy-name">${getStrategyDisplayName(strategy.fieldName || 'unknown')}</span>
+                            <span class="strategy-status ${statusClass}">${statusIcon} ${statusText}</span>
+                        </div>
+                        <div class="strategy-message">${strategy.message}</div>
+                        <div class="strategy-info">
+                            <strong>Strategy Pattern:</strong> This validation uses the ${getStrategyClassName(strategy.fieldName)} strategy
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = html;
+        }
+
+        function getStrategyDisplayName(fieldName) {
+            const names = {
+                'email': '📧 Email Validation Strategy',
+                'password': '🔒 Password Validation Strategy',
+                'name': '👤 Name Validation Strategy',
+                'firstName': '👤 First Name Validation',
+                'lastName': '👤 Last Name Validation',
+                'phoneNumber': '📱 Phone Validation Strategy'
+            };
+            return names[fieldName] || '🔍 Unknown Strategy';
+        }
+
+        function getStrategyClassName(fieldName) {
+            const classes = {
+                'email': 'EmailValidationStrategy',
+                'password': 'PasswordValidationStrategy',
+                'name': 'NameValidationStrategy',
+                'firstName': 'NameValidationStrategy',
+                'lastName': 'NameValidationStrategy',
+                'phoneNumber': 'PhoneValidationStrategy'
+            };
+            return classes[fieldName] || 'UnknownValidationStrategy';
+        }
+
+        // Real-time validation on input change
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', debounce(validateForm, 500));
+            });
+        });
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>
