@@ -2,6 +2,8 @@ package com.laundry.freshfoldlaundryapp.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "user")
 public class User {
@@ -22,6 +24,8 @@ public class User {
     private String phoneNumber;
     private String address;
     private String token;
+    private LocalDateTime tokenExpiry;
+    private boolean tokenUsed = false;
 
 
     public Long getId() {
@@ -94,5 +98,33 @@ public class User {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public LocalDateTime getTokenExpiry() {
+        return tokenExpiry;
+    }
+
+    public void setTokenExpiry(LocalDateTime tokenExpiry) {
+        this.tokenExpiry = tokenExpiry;
+    }
+
+    public boolean isTokenUsed() {
+        return tokenUsed;
+    }
+
+    public void setTokenUsed(boolean tokenUsed) {
+        this.tokenUsed = tokenUsed;
+    }
+
+    // Utility methods for token validation
+    public boolean isTokenValid() {
+        return token != null && !tokenUsed &&
+               tokenExpiry != null && LocalDateTime.now().isBefore(tokenExpiry);
+    }
+
+    public void clearToken() {
+        this.token = null;
+        this.tokenExpiry = null;
+        this.tokenUsed = false;
     }
 }

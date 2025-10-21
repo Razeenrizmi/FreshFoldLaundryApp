@@ -31,7 +31,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/register", "/login", "/dashboard", "/forgot-password", "/reset-password","/orders","/browse","/order/browse/**","/cart","/cart/**","/orders/order","/orders/index","/orders/select-clothes","/order/payment").permitAll()
+                        .requestMatchers("/register", "/login", "/dashboard", "/forgot-password", "/forgot-password/**", "/reset-password","/orders","/browse","/order/browse/**","/cart","/cart/**","/orders/order","/orders/index","/orders/select-clothes","/order/payment").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/customer-dashboard").hasAuthority("CUSTOMER")
                         .requestMatchers("/staff-dashboard").hasAuthority("STAFF")

@@ -21,14 +21,26 @@ public class ResetPasswordController {
     private BCryptPasswordEncoder passwordEncoder;
 
     @GetMapping("/reset-password")
-    public String showResetPasswordForm(@RequestParam(value = "email", required = false) String email, Model model) {
-        // For now, just show the form - token functionality removed
+    public String showResetPasswordForm(@RequestParam(value = "email", required = false) String email,
+                                      @RequestParam(value = "token", required = false) String token,
+                                      Model model) {
+        // Validate token if provided
+        if (email != null && token != null) {
+            User user = userService.findByEmail(email);
+            if (user == null || !user.isTokenValid() || !user.getToken().equals(token)) {
+                model.addAttribute("error", "Invalid or expired token. Please request a new password reset.");
+                return "forgot-password";
+            }
+        }
+
         model.addAttribute("email", email);
+        model.addAttribute("token", token);
         return "reset-password";
     }
 
     @PostMapping("/reset-password")
     public String handlePasswordReset(@RequestParam("email") String email,
+                                      @RequestParam(value = "token", required = false) String token,
                                       @RequestParam("password") String password,
                                       @RequestParam("confirmPassword") String confirmPassword,
                                       RedirectAttributes redirectAttributes) {
@@ -36,7 +48,7 @@ public class ResetPasswordController {
         // Validate the passwords
         if (password == null || password.isEmpty() || !password.equals(confirmPassword)) {
             redirectAttributes.addFlashAttribute("error", "Passwords do not match.");
-            return "redirect:/reset-password?email=" + email;
+            return "redirect:/reset-password?email=" + email + (token != null ? "&token=" + token : "");
         }
 
         // Find the user by email
@@ -48,8 +60,21 @@ public class ResetPasswordController {
             return "redirect:/forgot-password";
         }
 
+        // If token is provided, validate it
+        if (token != null && (!user.isTokenValid() || !user.getToken().equals(token))) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired token. Please request a new password reset.");
+            return "redirect:/forgot-password";
+        }
+
         // Update the user's password with the hashed password
         user.setPassword(passwordEncoder.encode(password));
+
+        // Mark token as used and clear it
+        if (token != null) {
+            user.setTokenUsed(true);
+            user.clearToken();
+        }
+
         userService.save(user);
 
         // Success message and redirect to login

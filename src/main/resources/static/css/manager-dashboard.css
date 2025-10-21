@@ -727,10 +727,196 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
 }
+
+/* Staff Selection Dropdown Styling */
+.staff-select, .enhanced-dropdown {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e3f2fd;
+    border-radius: 8px;
+    background: white;
+    color: #2c3e50;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(13, 71, 161, 0.08);
+}
+
+.staff-select:focus, .enhanced-dropdown:focus {
+    outline: none;
+    border-color: #1565c0;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
+    background: #fafbff;
+}
+
+.staff-select:hover, .enhanced-dropdown:hover {
+    border-color: #42a5f5;
+    box-shadow: 0 4px 12px rgba(13, 71, 161, 0.12);
+}
+
+.staff-select option, .enhanced-dropdown option {
+    background: white;
+    color: #2c3e50;
+    padding: 0.5rem;
+    font-weight: 500;
+}
+
+.staff-select option:hover, .enhanced-dropdown option:hover {
+    background: #f5f9ff;
+    color: #1565c0;
+}
+
+.staff-select option:checked, .enhanced-dropdown option:checked {
+    background: #1565c0;
+    color: white;
+}
+
+/* Enhanced Staff Dropdown with Higher Specificity */
+.data-table .staff-select,
+.data-table .enhanced-dropdown,
+table .staff-select,
+table .enhanced-dropdown {
+    width: 100% !important;
+    padding: 0.75rem 1rem !important;
+    border: 2px solid #1565c0 !important;
+    border-radius: 8px !important;
+    background: white !important;
+    background-color: white !important;
+    color: #2c3e50 !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    font-family: 'Poppins', sans-serif !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(13, 71, 161, 0.15) !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+}
+
+.data-table .staff-select:focus,
+.data-table .enhanced-dropdown:focus,
+table .staff-select:focus,
+table .enhanced-dropdown:focus {
+    outline: none !important;
+    border-color: #0d47a1 !important;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.2) !important;
+    background: #f8faff !important;
+    background-color: #f8faff !important;
+}
+
+.data-table .staff-select:hover,
+.data-table .enhanced-dropdown:hover,
+table .staff-select:hover,
+table .enhanced-dropdown:hover {
+    border-color: #0d47a1 !important;
+    box-shadow: 0 4px 12px rgba(13, 71, 161, 0.2) !important;
+    background: #fafbff !important;
+    background-color: #fafbff !important;
+}
+
+/* Staff Dropdown Options with Maximum Specificity */
+.data-table .staff-select option,
+.data-table .enhanced-dropdown option,
+table .staff-select option,
+table .enhanced-dropdown option,
+select.staff-select option,
+select.enhanced-dropdown option {
+    background: white !important;
+    background-color: white !important;
+    color: #1565c0 !important;
+    padding: 0.75rem !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    border: none !important;
+    margin: 0 !important;
+}
+
+.data-table .staff-select option:hover,
+.data-table .enhanced-dropdown option:hover,
+table .staff-select option:hover,
+table .enhanced-dropdown option:hover,
+select.staff-select option:hover,
+select.enhanced-dropdown option:hover {
+    background: #e3f2fd !important;
+    background-color: #e3f2fd !important;
+    color: #0d47a1 !important;
+}
+
+.data-table .staff-select option:checked,
+.data-table .enhanced-dropdown option:checked,
+table .staff-select option:checked,
+table .enhanced-dropdown option:checked,
+select.staff-select option:checked,
+select.enhanced-dropdown option:checked {
+    background: #1565c0 !important;
+    background-color: #1565c0 !important;
+    color: white !important;
+}
+
+/* Force visibility for all select elements in tables */
+.data-table td select,
+.table-container select,
+table select {
+    background: white !important;
+    color: #2c3e50 !important;
+    border: 2px solid #1565c0 !important;
+    font-weight: 600 !important;
+}
+
+.data-table td select option,
+.table-container select option,
+table select option {
+    background: white !important;
+    color: #1565c0 !important;
+    font-weight: 600 !important;
+    padding: 8px !important;
+}
+
+/* Chat section styling improvement */
+.chat-section {
+    background: white !important;
+    border: 1px solid #e3f2fd !important;
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    box-shadow: 0 8px 32px rgba(13, 71, 161, 0.08) !important;
+}
+
+.chat-section h2 {
+    color: #1565c0 !important;
+    margin-bottom: 1.5rem !important;
+    font-weight: 700 !important;
+}
+
+.chat-section select {
+    background: white !important;
+    color: #2c3e50 !important;
+    border: 2px solid #1565c0 !important;
+    border-radius: 8px !important;
+    padding: 0.75rem !important;
+    font-weight: 600 !important;
+}
+
+.chat-section select option {
+    background: white !important;
+    color: #1565c0 !important;
+    padding: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* Footer styling */
 .footer {
-    background: var(--secondary-color);
-    color: #13164a;
-    text-align: center;
-    padding: 20px 0;
-    margin-top: auto;
+    background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%) !important;
+    color: white !important;
+    text-align: center !important;
+    padding: 20px 0 !important;
+    margin-top: 3rem !important;
+    border-radius: 20px 20px 0 0 !important;
+}
+
+.footer p {
+    color: white !important;
+    font-weight: 500 !important;
 }
